@@ -1,4 +1,4 @@
-package task;
+package com.yandex.kanban.model;
 
 import java.util.Objects;
 import java.util.UUID;

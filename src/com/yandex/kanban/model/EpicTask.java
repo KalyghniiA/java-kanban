@@ -1,10 +1,6 @@
-package task.epicTask;
+package com.yandex.kanban.model;
 
-import exceptions.TaskException;
-import task.Task;
-import task.TaskStatus;
-import task.TaskType;
-import task.subtask.Subtask;
+import com.yandex.kanban.exception.TaskException;
 
 import java.util.ArrayList;
 import java.util.List;

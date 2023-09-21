@@ -1,4 +1,4 @@
-package exceptions;
+package com.yandex.kanban.exception;
 
 
 public class DatabaseException extends Exception{

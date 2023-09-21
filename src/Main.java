@@ -1,8 +1,9 @@
-import manager.Manager;
-import task.Task;
-import task.TaskStatus;
-import task.epicTask.EpicTask;
-import task.subtask.Subtask;
+
+import com.yandex.kanban.manager.Manager;
+import com.yandex.kanban.model.Task;
+import com.yandex.kanban.model.TaskStatus;
+import com.yandex.kanban.model.EpicTask;
+import com.yandex.kanban.model.Subtask;
 
 public class Main {
 
@@ -50,7 +51,7 @@ public class Main {
                 TaskStatus.IN_PROGRESS,
                 epicTask2.getId()
         );
-
+        //create
         manager.createTask(task1);
         manager.createTask(task2);
         manager.createTask(task3);
@@ -58,16 +59,22 @@ public class Main {
         manager.createTask(epicTask2);
         manager.createTask(subtask1);
         manager.createTask(subtask2);
+
+        //getAllTask
         System.out.println(manager.getAllTasks());
+
+        //get epicTask - testing status
         System.out.println(manager.getTask(epicTask1.getId()));
         System.out.println(manager.getTask(epicTask2.getId()));
 
+        //testing status epickTtask at delete subtask
         //manager.removeTask(subtask2.getId());
         //System.out.println(manager.getTask(epicTask2.getId()));
 
+        //testing getAllSubtask to epicTask
         //System.out.println(manager.getSubtasksToEpicTask(epicTask2.getId()));
 
-
+        //testing remove epictask and all subtasks
         manager.removeTask(epicTask2.getId());
         System.out.println(manager.getAllTasks());
     }

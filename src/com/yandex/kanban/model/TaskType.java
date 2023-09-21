@@ -1,4 +1,4 @@
-package task;
+package com.yandex.kanban.model;
 
 public enum TaskType {
     NORMAL("NORMAL"),

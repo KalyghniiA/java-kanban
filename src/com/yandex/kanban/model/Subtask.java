@@ -1,8 +1,4 @@
-package task.subtask;
-
-import task.Task;
-import task.TaskStatus;
-import task.TaskType;
+package com.yandex.kanban.model;
 
 import java.util.UUID;
 
