@@ -7,6 +7,7 @@ public class DatabaseException extends Exception{
     public DatabaseException(String message) {
         this.message = message;
     }
+
     @Override
     public String getMessage() {
         return message;

@@ -4,8 +4,8 @@ import java.util.UUID;
 
 public class Subtask extends Task {
     UUID epicTaskId;
-    public Subtask(String name, String description, TaskStatus status, UUID epicTaskId) {
-        super(name, description, status);
+    public Subtask(String name, String description, TaskStatus status,UUID id, UUID epicTaskId) {
+        super(name, description, status, id);
         this.epicTaskId = epicTaskId;
         this.type = TaskType.SUBTASK;
     }

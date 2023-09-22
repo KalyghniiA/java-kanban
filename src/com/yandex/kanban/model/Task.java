@@ -10,10 +10,10 @@ public class Task {
     protected TaskType type;
     protected TaskStatus status;
 
-    public Task(String name, String description, TaskStatus status) {
+    public Task(String name, String description, TaskStatus status, UUID id) {
         this.name = name;
         this.description = description;
-        id = UUID.randomUUID();
+        this.id = id;
         type = TaskType.NORMAL;
         this.status = status;
     }

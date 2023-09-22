@@ -5,6 +5,8 @@ import com.yandex.kanban.model.TaskStatus;
 import com.yandex.kanban.model.EpicTask;
 import com.yandex.kanban.model.Subtask;
 
+import java.util.UUID;
+
 public class Main {
 
     public static void main(String[] args) {
@@ -13,35 +15,41 @@ public class Main {
         Task task1 = new Task(
                 "task1",
                 "description",
-                TaskStatus.NEW
+                TaskStatus.NEW,
+                UUID.randomUUID()
         );
 
         Task task2 = new Task(
                 "Task2",
                 "description",
-                TaskStatus.IN_PROGRESS
+                TaskStatus.IN_PROGRESS,
+                UUID.randomUUID()
         );
 
         Task task3 = new Task(
                 "Task3",
                 "description",
-                TaskStatus.DONE
+                TaskStatus.DONE,
+                UUID.randomUUID()
         );
 
         EpicTask epicTask1 = new EpicTask(
                 "epicTask1",
-                "description"
+                "description",
+                UUID.randomUUID()
         );
 
         EpicTask epicTask2 = new EpicTask(
                 "epicTask2",
-                "description"
+                "description",
+                UUID.randomUUID()
         );
 
         Subtask subtask1 = new Subtask(
                 "subtask1",
                 "description",
                 TaskStatus.NEW,
+                UUID.randomUUID(),
                 epicTask2.getId()
         );
 
@@ -49,6 +57,7 @@ public class Main {
                 "subtask2",
                 "description",
                 TaskStatus.IN_PROGRESS,
+                UUID.randomUUID(),
                 epicTask2.getId()
         );
         //create
@@ -59,6 +68,8 @@ public class Main {
         manager.createTask(epicTask2);
         manager.createTask(subtask1);
         manager.createTask(subtask2);
+
+
 
         //getAllTask
         System.out.println(manager.getAllTasks());
