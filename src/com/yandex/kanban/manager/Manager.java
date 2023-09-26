@@ -32,6 +32,8 @@ public class Manager {
             return;
         }
 
+        task.setId(UUID.randomUUID());
+
         database.put(task.getId(), task);
 
         if (task.getType().equals(TaskType.SUBTASK)) {
@@ -84,6 +86,7 @@ public class Manager {
 
     public void removeAllSubtasks() {
         database.entrySet().removeIf(task -> task.getValue().getType().equals(TaskType.SUBTASK));
+        database.values().stream().filter(task -> task.getType().equals(TaskType.EPIC_TASK)).forEach(task -> checkStatusToEpicTask((EpicTask) task));
     }
 
     public void removeAllEpicTask() {

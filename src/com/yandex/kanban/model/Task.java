@@ -6,14 +6,14 @@ import java.util.UUID;
 public class Task {
     protected String name;
     protected String description;
-    protected final UUID id;
+    protected UUID id;
     protected TaskType type;
     protected TaskStatus status;
 
-    public Task(String name, String description, TaskStatus status, UUID id) {
+    public Task(String name, String description, TaskStatus status) {
         this.name = name;
         this.description = description;
-        this.id = id;
+
         type = TaskType.NORMAL;
         this.status = status;
     }
@@ -52,6 +52,10 @@ public class Task {
 
     public void setStatus(TaskStatus status) {
         this.status = status;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     @Override

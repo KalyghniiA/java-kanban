@@ -8,8 +8,8 @@ import java.util.UUID;
 
 public class EpicTask extends Task {
     List<UUID> subtasksId;
-    public EpicTask(String name, String description, UUID id) {
-        super(name, description, TaskStatus.NEW, id);
+    public EpicTask(String name, String description) {
+        super(name, description, TaskStatus.NEW);
         this.subtasksId = new ArrayList<>();
         this.type = TaskType.EPIC_TASK;
     }

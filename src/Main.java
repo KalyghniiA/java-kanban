@@ -15,41 +15,35 @@ public class Main {
         Task task1 = new Task(
                 "task1",
                 "description",
-                TaskStatus.NEW,
-                UUID.randomUUID()
+                TaskStatus.NEW
         );
 
         Task task2 = new Task(
                 "Task2",
                 "description",
-                TaskStatus.IN_PROGRESS,
-                UUID.randomUUID()
+                TaskStatus.IN_PROGRESS
         );
 
         Task task3 = new Task(
                 "Task3",
                 "description",
-                TaskStatus.DONE,
-                UUID.randomUUID()
+                TaskStatus.DONE
         );
 
         EpicTask epicTask1 = new EpicTask(
                 "epicTask1",
-                "description",
-                UUID.randomUUID()
+                "description"
         );
 
         EpicTask epicTask2 = new EpicTask(
                 "epicTask2",
-                "description",
-                UUID.randomUUID()
+                "description"
         );
 
         Subtask subtask1 = new Subtask(
                 "subtask1",
                 "description",
                 TaskStatus.NEW,
-                UUID.randomUUID(),
                 epicTask2.getId()
         );
 
@@ -57,7 +51,6 @@ public class Main {
                 "subtask2",
                 "description",
                 TaskStatus.IN_PROGRESS,
-                UUID.randomUUID(),
                 epicTask2.getId()
         );
         //create
