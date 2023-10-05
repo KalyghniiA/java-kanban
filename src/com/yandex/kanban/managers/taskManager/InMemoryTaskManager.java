@@ -1,7 +1,9 @@
-package com.yandex.kanban.manager;
+package com.yandex.kanban.managers.taskManager;
 
 import com.yandex.kanban.exception.DatabaseException;
 import com.yandex.kanban.exception.TaskException;
+import com.yandex.kanban.managers.Managers;
+import com.yandex.kanban.managers.historyManager.HistoryManager;
 import com.yandex.kanban.model.Task;
 import com.yandex.kanban.model.TaskType;
 import com.yandex.kanban.model.EpicTask;
@@ -10,14 +12,17 @@ import com.yandex.kanban.model.Subtask;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Manager {
+public class InMemoryTaskManager implements TaskManager{
 
     private final Map<UUID, Task> database;
+    private final HistoryManager history;
 
-    public Manager() {
+    public InMemoryTaskManager() {
         database = new HashMap<>();
+        history = Managers.getDefaultHistoryManager();
     }
 
+    @Override
     public void createTask(Task task) {
         try {
             if (task == null) {
@@ -56,43 +61,76 @@ public class Manager {
         }
     }
 
+    @Override
     public void createTasks(List<Task> tasks) {
         tasks.forEach(this::createTask);
     }
 
+    @Override
     public List<Task> getAllTasks() {
-        return new ArrayList<>(database.values());
+        List<Task> tasks = new ArrayList<>(database.values());
+        history.add(tasks);
+        return tasks;
     }
 
+    @Override
     public List<Task> getAllNormalTask() {
-        return database.values().stream().filter(task -> task.getType().equals(TaskType.NORMAL)).collect(Collectors.toList());
+        List<Task> tasks = database.values()
+                .stream()
+                .filter(task -> task.getType().equals(TaskType.NORMAL))
+                .collect(Collectors.toList());
+        history.add(tasks);
+        return tasks;
     }
 
+    @Override
     public List<Task> getAllSubtask() {
-        return database.values().stream().filter(task -> task.getType().equals(TaskType.SUBTASK)).collect(Collectors.toList());
+        List<Task> tasks = database.values()
+                .stream()
+                .filter(task -> task.getType().equals(TaskType.SUBTASK))
+                .collect(Collectors.toList());
+        history.add(tasks);
+        return tasks;
     }
 
+    @Override
     public List<Task> getAllEpicTask() {
-        return database.values().stream().filter(task -> task.getType().equals(TaskType.EPIC_TASK)).collect(Collectors.toList());
+        List<Task> tasks = database.values()
+                .stream()
+                .filter(task -> task.getType().equals(TaskType.EPIC_TASK))
+                .collect(Collectors.toList());
+        history.add(tasks);
+        return tasks;
     }
 
+    @Override
     public void removeAllTasks() {
         database.clear();
+        history.clear();
     }
 
+    @Override
     public void removeAllNormalTask() {
+        List<Task> tasks = database.values().stream().filter(task -> task.getType().equals(TaskType.NORMAL)).collect(Collectors.toList());
+        history.remove(tasks);
         database.entrySet().removeIf(task -> task.getValue().getType().equals(TaskType.NORMAL));
     }
 
+    @Override
     public void removeAllSubtasks() {
-        database.entrySet().removeIf(task -> task.getValue().getType().equals(TaskType.SUBTASK));
-        database.values().stream().filter(task -> task.getType().equals(TaskType.EPIC_TASK)).forEach(task -> checkStatusToEpicTask((EpicTask) task));
+        List<Task> tasks = database.values().stream().filter(task -> task.getType().equals(TaskType.SUBTASK)).collect(Collectors.toList());
+        history.remove(tasks);
+        tasks.forEach(task -> removeTask(task.getId()));
     }
 
+    @Override
     public void removeAllEpicTask() {
+        List<Task> tasks = database.values().stream().filter(task -> !task.getType().equals(TaskType.NORMAL)).collect(Collectors.toList());
+        history.remove(tasks);
         database.entrySet().removeIf(task -> task.getValue().getType().equals(TaskType.EPIC_TASK) || task.getValue().getType().equals(TaskType.SUBTASK));
     }
 
+    @Override
     public Task getTask(UUID id) {
         try {
             if (id == null) {
@@ -106,10 +144,14 @@ public class Manager {
             System.out.println(e.getMessage());
             return null;
         }
+        Task task = database.get(id);
 
-        return database.get(id);
+        history.add(task);
+
+        return task;
     }
 
+    @Override
     public void replaceTask(Task task) {
         try {
             if (task == null) {
@@ -120,6 +162,8 @@ public class Manager {
                 throw new DatabaseException("Данной задачи нет");
             }
 
+            Task oldTask = database.get(task.getId());
+            history.replace(oldTask, task);
             database.replace(task.getId(), task);
 
             if (task.getType().equals(TaskType.SUBTASK)) {
@@ -131,6 +175,7 @@ public class Manager {
         }
     }
 
+    @Override
     public void removeTask(UUID id) {
         try {
             if (id == null) {
@@ -145,11 +190,14 @@ public class Manager {
         }
 
         Task task = database.remove(id);
+        history.remove(task);
 
         if (task.getType().equals(TaskType.EPIC_TASK)) {
             List<UUID> subtasksId = ((EpicTask) task).getSubtasksId();
             for (UUID subtaskId : subtasksId) {
+                Task subtask = database.get(subtaskId);
                 database.remove(subtaskId);
+                history.remove(subtask);
             }
         }
 
@@ -165,8 +213,21 @@ public class Manager {
         }
     }
 
+    @Override
     public List<Task> getSubtasksToEpicTask(UUID id) {
-        Task task = getTask(id);
+        try {
+            if (id == null) {
+                throw new TaskException("Передано пустое значение");
+            }
+            if (!database.containsKey(id)) {
+                throw new TaskException("Данной задачи нет в базе");
+            }
+        } catch (TaskException e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
+
+        Task task = database.get(id);
         if (!(task.getType().equals(TaskType.EPIC_TASK))) {
             System.out.printf("У задачи с переданным id не может быть подзадач. Тип данной задачи: %s%n", task.getClass());
             return null;
@@ -176,34 +237,26 @@ public class Manager {
         for (UUID subtaskId : subtasksId) {
             subtasks.add(getTask(subtaskId));
         }
+        history.add(subtasks);
 
         return subtasks;
+    }
+
+    @Override
+    public List<Task> getHistory() {
+        return history.getHistory();
     }
 
     private void checkStatusToEpicTask(EpicTask task) {
         List<Subtask> subtasks = new ArrayList<>();
         List<UUID> subtasksId = task.getSubtasksId();
         for (UUID subtaskId : subtasksId) {
-            subtasks.add((Subtask) database.get(subtaskId));
+            if (database.containsKey(subtaskId)) {
+                subtasks.add((Subtask) database.get(subtaskId));
+            }
         }
         task.checkStatus(subtasks);
     }
 
 }
 
-/*Возможность хранить задачи всех типов. Для этого вам нужно выбрать подходящую коллекцию.
-Методы для каждого из типа задач(Задача/Эпик/Подзадача):
-Получение списка всех задач. +
-Удаление всех задач. +
-Получение по идентификатору. +
-Создание. Сам объект должен передаваться в качестве параметра. +
-Обновление. Новая версия объекта с верным идентификатором передаётся в виде параметра. +
-Удаление по идентификатору. +
-Дополнительные методы:
-Получение списка всех подзадач определённого эпика.
-Управление статусами осуществляется по следующему правилу:
-Менеджер сам не выбирает статус для задачи. Информация о нём приходит менеджеру вместе с информацией о самой задаче. По этим данным в одних случаях он будет сохранять статус, в других будет рассчитывать.
-Для эпиков:+
-если у эпика нет подзадач или все они имеют статус NEW, то статус должен быть NEW.
-если все подзадачи имеют статус DONE, то и эпик считается завершённым — со статусом DONE.
-во всех остальных случаях статус должен быть IN_PROGRESS.*/

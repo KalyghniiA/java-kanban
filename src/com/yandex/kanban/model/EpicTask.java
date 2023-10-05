@@ -43,6 +43,20 @@ public class EpicTask extends Task {
     }
 
     public void checkStatus(List<Subtask> subtasks) {
+        try {
+            if (subtasks == null) {
+                throw new TaskException("Передано пустое значение");
+            }
+        } catch (TaskException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
+
+        if (subtasks.isEmpty()) {
+            this.status = TaskStatus.NEW;
+            return;
+        }
+
         int iterator = 0;
         for (Subtask task: subtasks) {
             if (task.getStatus().equals(TaskStatus.IN_PROGRESS)) {
@@ -55,7 +69,6 @@ public class EpicTask extends Task {
 
         if (iterator == subtasks.size()) {
             this.status = TaskStatus.DONE;
-            return;
         } else if (iterator > 0 && iterator < subtasks.size()) {
             this.status = TaskStatus.IN_PROGRESS;
         } else {
