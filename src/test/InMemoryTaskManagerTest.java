@@ -467,4 +467,125 @@ class InMemoryTaskManagerTest {
                 () -> assertTrue(manager.getSubtasksToEpicTask(epicTask1.getId()).isEmpty())
         );
     }
+
+    @Test
+    void checkStatusEpicTaskToNew() {
+        manager.createTask(epicTask2);
+        subtask1 = new Subtask(
+                "subtask1",
+                "description",
+                TaskStatus.NEW,
+                epicTask2.getId()
+        );
+
+        assertEquals(epicTask2.getStatus(), TaskStatus.NEW);
+
+        manager.createTask(subtask1);
+
+        assertEquals(epicTask2.getStatus(), TaskStatus.NEW);
+    }
+
+    @Test
+    void checkStatusEpicTaskToInProgress() {
+        manager.createTask(epicTask2);
+        subtask1 = new Subtask(
+                "subtask1",
+                "description",
+                TaskStatus.NEW,
+                epicTask2.getId()
+        );
+        subtask2  = new Subtask(
+                "subtask2",
+                "description",
+                TaskStatus.IN_PROGRESS,
+                epicTask2.getId()
+        );
+
+        manager.createTask(subtask1);
+
+        manager.createTask(subtask2);
+
+        assertEquals(epicTask2.getStatus(), TaskStatus.IN_PROGRESS);
+    }
+
+    @Test
+    void checkStatusEpicTaskToReplaceSubtask() {
+        manager.createTask(epicTask2);
+        subtask1 = new Subtask(
+                "subtask1",
+                "description",
+                TaskStatus.NEW,
+                epicTask2.getId()
+        );
+
+        manager.createTask(subtask1);
+
+        Task newSubtask = new Subtask(
+                subtask1.getName(),
+                subtask1.getDescription(),
+                TaskStatus.IN_PROGRESS,
+                subtask1.getEpicTaskId()
+        );
+        newSubtask.setId(subtask1.getId());
+
+        manager.replaceTask(newSubtask);
+
+        assertEquals(epicTask2.getStatus(), TaskStatus.IN_PROGRESS);
+    }
+
+    @Test
+    void checkStatusEpicTaskToDoneStatusSubtask() {
+        manager.createTask(epicTask2);
+        subtask1 = new Subtask(
+                "subtask1",
+                "description",
+                TaskStatus.NEW,
+                epicTask2.getId()
+        );
+
+        manager.createTask(subtask1);
+        Task newSubtask = new Subtask(
+                subtask1.getName(),
+                subtask1.getDescription(),
+                TaskStatus.DONE,
+                subtask1.getEpicTaskId()
+        );
+        newSubtask.setId(subtask1.getId());
+
+        manager.replaceTask(newSubtask);
+
+        assertEquals(epicTask2.getStatus(), TaskStatus.DONE);
+    }
+
+    @Test
+    void checkStatusEpicTaskToOneTaskDone() {
+        manager.createTask(epicTask2);
+        subtask1 = new Subtask(
+                "subtask1",
+                "description",
+                TaskStatus.NEW,
+                epicTask2.getId()
+        );
+        subtask2  = new Subtask(
+                "subtask2",
+                "description",
+                TaskStatus.IN_PROGRESS,
+                epicTask2.getId()
+        );
+
+        manager.createTask(subtask1);
+        manager.createTask(subtask2);
+
+        Task newSubtask = new Subtask(
+                subtask1.getName(),
+                subtask1.getDescription(),
+                TaskStatus.DONE,
+                subtask1.getEpicTaskId()
+        );
+        newSubtask.setId(subtask1.getId());
+
+        manager.replaceTask(newSubtask);
+
+        assertEquals(epicTask2.getStatus(), TaskStatus.IN_PROGRESS);
+    }
 }

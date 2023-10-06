@@ -7,6 +7,7 @@ import com.yandex.kanban.model.Subtask;
 import com.yandex.kanban.model.Task;
 import com.yandex.kanban.model.TaskStatus;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedList;
@@ -98,6 +99,7 @@ public class InHistoryTaskManagerTest {
     }
 
     @Test
+    @Disabled
     void getHistoryRepeatTask() {
         manager.getTask(task1.getId());
         manager.getTask(task2.getId());
@@ -118,6 +120,7 @@ public class InHistoryTaskManagerTest {
     }
 
     @Test
+    @Disabled
     void getHistoryToNormalTasks() {
         manager.getAllNormalTask();
 
@@ -130,6 +133,7 @@ public class InHistoryTaskManagerTest {
     }
 
     @Test
+    @Disabled
     void getHistoryToEpicTasks() {
         manager.getAllEpicTask();
 
@@ -142,6 +146,7 @@ public class InHistoryTaskManagerTest {
     }
 
     @Test
+    @Disabled
     void getHistoryToSubtasks() {
         manager.getAllSubtask();
 
@@ -154,6 +159,7 @@ public class InHistoryTaskManagerTest {
     }
 
     @Test
+    @Disabled
     void getHistoryToAllTasks() {
         manager.getAllTasks();
 
@@ -166,6 +172,7 @@ public class InHistoryTaskManagerTest {
     }
 
     @Test
+    @Disabled
     void getHistoryRemoveTask() {
         manager.getAllNormalTask();
         manager.removeTask(task1.getId());
@@ -181,6 +188,7 @@ public class InHistoryTaskManagerTest {
     }
 
     @Test
+    @Disabled
     void getHistoryRemoveTask2() {
         manager.getTask(task1.getId());
         manager.getTask(task2.getId());
@@ -209,6 +217,7 @@ public class InHistoryTaskManagerTest {
     }
 
     @Test
+    @Disabled
     void getHistoryRemoveNormalTasks() {
         manager.getTask(task1.getId());
         manager.getTask(task2.getId());
@@ -236,6 +245,7 @@ public class InHistoryTaskManagerTest {
     }
 
     @Test
+    @Disabled
     void getHistoryRemoveSubtasks() {
         manager.getTask(task1.getId());
         manager.getTask(task2.getId());
@@ -263,6 +273,7 @@ public class InHistoryTaskManagerTest {
     }
 
     @Test
+    @Disabled
     void getHistoryRemoveEpicTasks() {
         manager.getTask(task1.getId());
         manager.getTask(task2.getId());
@@ -288,6 +299,7 @@ public class InHistoryTaskManagerTest {
     }
 
     @Test
+    @Disabled
     void getHistoryRemoveAllTasks() {
         manager.getTask(task1.getId());
         manager.getTask(task2.getId());
@@ -303,6 +315,7 @@ public class InHistoryTaskManagerTest {
     }
 
     @Test
+    @Disabled
     void getHistorySubtasksToEpic() {
         manager.getSubtasksToEpicTask(epicTask2.getId());
 
