@@ -99,28 +99,6 @@ public class InHistoryTaskManagerTest {
     }
 
     @Test
-    void getHistoryThreeTaskRepeatTask() {
-        manager.getTask(task1.getId());
-        manager.getTask(task2.getId());
-        manager.getTask(task3.getId());
-        manager.getTask(task1.getId());
-
-        List<Task> testingList = new LinkedList<>();
-        testingList.add(task2);
-        testingList.add(task3);
-        testingList.add(task1);
-        System.out.println(manager.getHistory());
-
-        assertAll(
-                () -> assertTrue(manager.getHistory().containsAll(testingList)),
-                () -> assertEquals(manager.getHistory().size(), testingList.size()),
-                () -> assertEquals(manager.getHistory().get(0), task2),
-                () -> assertEquals(manager.getHistory().get(2), task1)
-        );
-    }
-
-    @Test
-    @Disabled
     void getHistoryRepeatTask() {
         manager.getTask(task1.getId());
         manager.getTask(task2.getId());
@@ -209,7 +187,6 @@ public class InHistoryTaskManagerTest {
     }
 
     @Test
-    @Disabled
     void getHistoryRemoveTask2() {
         manager.getTask(task1.getId());
         manager.getTask(task2.getId());
@@ -238,7 +215,6 @@ public class InHistoryTaskManagerTest {
     }
 
     @Test
-    @Disabled
     void getHistoryRemoveNormalTasks() {
         manager.getTask(task1.getId());
         manager.getTask(task2.getId());
@@ -266,7 +242,6 @@ public class InHistoryTaskManagerTest {
     }
 
     @Test
-    @Disabled
     void getHistoryRemoveSubtasks() {
         manager.getTask(task1.getId());
         manager.getTask(task2.getId());
@@ -294,7 +269,6 @@ public class InHistoryTaskManagerTest {
     }
 
     @Test
-    @Disabled
     void getHistoryRemoveEpicTasks() {
         manager.getTask(task1.getId());
         manager.getTask(task2.getId());
@@ -320,7 +294,6 @@ public class InHistoryTaskManagerTest {
     }
 
     @Test
-    @Disabled
     void getHistoryRemoveAllTasks() {
         manager.getTask(task1.getId());
         manager.getTask(task2.getId());
@@ -331,8 +304,22 @@ public class InHistoryTaskManagerTest {
         manager.getTask(subtask2.getId());
 
         manager.removeAllTasks();
-
         assertTrue(manager.getHistory().isEmpty());
+    }
+
+    @Test
+    void getHistoryRemoveAllTasksAndGetTask() {
+        manager.getTask(task1.getId());
+        manager.getTask(task2.getId());
+        manager.getTask(task3.getId());
+        manager.removeAllTasks();
+        manager.createTask(task1);
+        manager.getTask(task1.getId());
+
+        assertAll(
+                () -> assertTrue(manager.getHistory().contains(task1)),
+                () -> assertEquals(1, manager.getHistory().size())
+        );
     }
 
     @Test

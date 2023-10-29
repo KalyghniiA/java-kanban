@@ -34,6 +34,7 @@ public class CustomLinkedList<T> {
         if (this.prev == null && this.next == null) {
             throw new CustomListException("Список пуст");
         }
+
         if (node.equals(this.prev)) {
             this.prev = node.getNext();
         }
@@ -88,19 +89,18 @@ public class CustomLinkedList<T> {
 
         public void removeNode() {
 
-            if (this.prev == null && this.next == null) {
-                return;
-            } else if (this.prev == null) {
+            if (this.prev == null && this.next != null) {
                 this.next.setPrev(null);
-            } else if (this.next == null) {
+            } else if (this.next == null && this.prev != null) {
                 this.prev.setNext(null);
-            } else {
+            } else if (this.next != null && this.prev != null) {
                 this.prev.setNext(this.next);
                 this.next.setPrev(this.prev);
             }
 
             this.prev = null;
             this.next = null;
+            this.data = null;
         }
 
         @Override

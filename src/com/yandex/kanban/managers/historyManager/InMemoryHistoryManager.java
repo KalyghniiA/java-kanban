@@ -73,7 +73,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     public List<Task> getHistory() {
         if (history.size() == 0) {
             System.out.println("История пуста");
-            return null;
+            return new ArrayList<>();
         }
 
         List<Task> result = new LinkedList<>();
@@ -83,7 +83,7 @@ public class InMemoryHistoryManager implements HistoryManager {
             next = history.getFirst();
         } catch (CustomListException e) {
             System.out.println(e.getMessage());
-            return null;
+            return new ArrayList<>();
         }
 
         for (int i = 0; i < history.size(); i++) {
@@ -97,6 +97,7 @@ public class InMemoryHistoryManager implements HistoryManager {
         return result;
     }
 
+    @Override
     public void clear() {
         if (history.size() == 0) {
             System.out.println("История пуста");
@@ -111,10 +112,16 @@ public class InMemoryHistoryManager implements HistoryManager {
             System.out.println(e.getMessage());
             return;
         }
+        int size = history.size();
 
-        for (int i = 0; i < history.size(); i++) {
+        for (int i = 0; i < size; i++) {
             nextNode = node.getNext();
-            node.removeNode();
+            try {
+                history.remove(node);
+            } catch (CustomListException e) {
+                System.out.println(e.getMessage());
+            }
+            node = nextNode;
             if (nextNode == null) {
                 break;
             }

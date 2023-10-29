@@ -98,22 +98,36 @@ public class InMemoryTaskManager implements TaskManager{
     @Override
     public void removeAllTasks() {
         database.clear();
+        history.clear();
     }
 
     @Override
     public void removeAllNormalTask() {
-        database.entrySet().removeIf(task -> task.getValue().getType() == TaskType.NORMAL);
+        //database.entrySet().removeIf(task -> task.getValue().getType() == TaskType.NORMAL);
+        List<Task> tasks = database.values()
+                .stream()
+                .filter(task -> task.getType() == TaskType.NORMAL)
+                .collect(Collectors.toList());
+        tasks.forEach(task -> this.removeTask(task.getId()));
     }
 
     @Override
     public void removeAllSubtasks() {
-        List<Task> tasks = database.values().stream().filter(task -> task.getType() == TaskType.SUBTASK).collect(Collectors.toList());
+        List<Task> tasks = database.values()
+                .stream()
+                .filter(task -> task.getType() == TaskType.SUBTASK)
+                .collect(Collectors.toList());
         tasks.forEach(task -> removeTask(task.getId()));
     }
 
     @Override
     public void removeAllEpicTask() {
-        database.entrySet().removeIf(task -> task.getValue().getType() == TaskType.EPIC_TASK || task.getValue().getType() == TaskType.SUBTASK);
+        //database.entrySet().removeIf(task -> task.getValue().getType() == TaskType.EPIC_TASK || task.getValue().getType() == TaskType.SUBTASK);
+        List<Task> tasks = database.values()
+                .stream()
+                .filter(task -> task.getType() == TaskType.EPIC_TASK)
+                .collect(Collectors.toList());
+        tasks.forEach(task -> this.removeTask(task.getId()));
     }
 
     @Override
@@ -174,11 +188,13 @@ public class InMemoryTaskManager implements TaskManager{
         }
 
         Task task = database.remove(id);
+        history.remove(task.getId());
 
         if (task.getType() == TaskType.EPIC_TASK) {
             List<UUID> subtasksId = ((EpicTask) task).getSubtasksId();
             for (UUID subtaskId : subtasksId) {
                 database.remove(subtaskId);
+                history.remove(subtaskId);
             }
         }
 
