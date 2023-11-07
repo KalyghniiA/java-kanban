@@ -16,6 +16,15 @@ public class Task {
 
         type = TaskType.NORMAL;
         this.status = status;
+        this.id = UUID.randomUUID();
+    }
+
+    public Task(String name, String description, TaskStatus status, UUID id) {
+        this.name = name;
+        this.description = description;
+        this.status = status;
+        this.type = TaskType.NORMAL;
+        this.id = id;
     }
 
     public String getName() {
@@ -56,6 +65,10 @@ public class Task {
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public String toLineForFile() {
+        return String.format("%s,%s,%s,%s,%s,null", this.id, this.type, this.name, this.description, this.status);
     }
 
     @Override

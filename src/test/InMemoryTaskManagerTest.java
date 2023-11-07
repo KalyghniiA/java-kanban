@@ -221,7 +221,6 @@ class InMemoryTaskManagerTest {
 
         List<Task> testingList = List.of(subtask1, subtask2);
 
-
         assertAll(
                 () -> assertTrue(manager.getAllSubtask().containsAll(testingList)),
                 () -> assertEquals(2, manager.getAllSubtask().size()),

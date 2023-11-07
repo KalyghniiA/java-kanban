@@ -14,8 +14,8 @@ import java.util.stream.Collectors;
 
 public class InMemoryTaskManager implements TaskManager{
 
-    private final Map<UUID, Task> database;
-    private final HistoryManager history;
+    protected final Map<UUID, Task> database;
+    protected final HistoryManager history;
 
     public InMemoryTaskManager() {
         database = new HashMap<>();
@@ -36,8 +36,6 @@ public class InMemoryTaskManager implements TaskManager{
             System.out.println(e.getMessage());
             return;
         }
-
-        task.setId(UUID.randomUUID());
 
         database.put(task.getId(), task);
 
@@ -103,7 +101,6 @@ public class InMemoryTaskManager implements TaskManager{
 
     @Override
     public void removeAllNormalTask() {
-        //database.entrySet().removeIf(task -> task.getValue().getType() == TaskType.NORMAL);
         List<Task> tasks = database.values()
                 .stream()
                 .filter(task -> task.getType() == TaskType.NORMAL)
@@ -122,7 +119,6 @@ public class InMemoryTaskManager implements TaskManager{
 
     @Override
     public void removeAllEpicTask() {
-        //database.entrySet().removeIf(task -> task.getValue().getType() == TaskType.EPIC_TASK || task.getValue().getType() == TaskType.SUBTASK);
         List<Task> tasks = database.values()
                 .stream()
                 .filter(task -> task.getType() == TaskType.EPIC_TASK)
