@@ -239,7 +239,16 @@ public class InMemoryTaskManager implements TaskManager{
         return history.getHistory();
     }
 
-    private void checkStatusToEpicTask(EpicTask task) {
+    protected void checkStatusToEpicTask(EpicTask task) {
+        try {
+            if (task == null) {
+                throw new TaskException("Передано пустое значение");
+            }
+        } catch (TaskException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
+
         List<Subtask> subtasks = new ArrayList<>();
         List<UUID> subtasksId = task.getSubtasksId();
         for (UUID subtaskId : subtasksId) {

@@ -6,21 +6,15 @@ import com.yandex.kanban.writer.Writer;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.yandex.kanban.util.PathConstant.*;
+
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
-    //Может убрать в Enum?
-    private static final String RESOURCE = "resources" + File.separator;
-    private static final String FILE_NAME = "dataBase.csv";
-    private static final String HEADER = "id,type,name,description,status,other";
-    private static final Path PATH = Paths.get(RESOURCE, FILE_NAME);
-
     public FileBackedTasksManager() {
         this.readFile();
     }
@@ -101,9 +95,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             }
         }
 
-        tasks.stream().filter(task -> task.getType() == TaskType.NORMAL).forEach(super::createTask);
-        tasks.stream().filter(task -> task.getType() == TaskType.EPIC_TASK).forEach(super::createTask);
-        tasks.stream().filter(task -> task.getType() == TaskType.SUBTASK).forEach(super::createTask);
+        tasks.stream().filter(task -> task.getType() == TaskType.NORMAL).forEach(task -> database.put(task.getId(), task));
+        tasks.stream().filter(task -> task.getType() == TaskType.EPIC_TASK).forEach(task -> database.put(task.getId(), task));
+        tasks.stream().filter(task -> task.getType() == TaskType.SUBTASK).peek(task -> database.put(task.getId(), task)).forEach(task -> checkStatusToEpicTask((EpicTask) database.get( ((Subtask) task).getEpicTaskId())));
 
         //Посмотри внимательней, пожалуйста, есть вопросы по реализации, не лучше ли хранить в истории только айди
         //и сделать отдельный метод для восстановления истории в менеджере историй
