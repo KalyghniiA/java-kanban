@@ -37,6 +37,7 @@ public class InMemoryTaskManager implements TaskManager{
             return;
         }
 
+        task.setId(UUID.randomUUID());
         database.put(task.getId(), task);
 
         if (task.getType() == TaskType.SUBTASK) {

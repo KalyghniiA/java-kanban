@@ -16,7 +16,6 @@ public class Task {
 
         type = TaskType.NORMAL;
         this.status = status;
-        this.id = UUID.randomUUID();
     }
 
     public Task(String name, String description, TaskStatus status, UUID id) {

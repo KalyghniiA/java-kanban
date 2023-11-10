@@ -12,13 +12,13 @@ public class EpicTask extends Task {
         super(name, description, TaskStatus.NEW);
         this.subtasksId = new ArrayList<>();
         this.type = TaskType.EPIC_TASK;
-        this.id = UUID.randomUUID();
     }
 
     public EpicTask(String name, String description, UUID id) {
-        super(name, description, TaskStatus.NEW, id);
+        super(name, description, TaskStatus.NEW);
         this.subtasksId = new ArrayList<>();
         this.type = TaskType.EPIC_TASK;
+        this.id = id;
     }
 
     public List<UUID> getSubtasksId() {

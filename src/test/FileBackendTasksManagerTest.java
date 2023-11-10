@@ -48,20 +48,6 @@ public class FileBackendTasksManagerTest {
                 "epicTask2",
                 "description"
         );
-
-        subtask1 = new Subtask(
-                "subtask1",
-                "description",
-                TaskStatus.NEW,
-                epicTask2.getId()
-        );
-
-        subtask2  = new Subtask(
-                "subtask2",
-                "description",
-                TaskStatus.IN_PROGRESS,
-                epicTask2.getId()
-        );
     }
 
     @Test
@@ -70,6 +56,12 @@ public class FileBackendTasksManagerTest {
         manager.createTask(task2);
         manager.createTask(task3);
         manager.createTask(epicTask2);
+        subtask1 = new Subtask(
+                "subtask1",
+                "description",
+                TaskStatus.NEW,
+                epicTask2.getId()
+        );
         manager.createTask(subtask1);
 
         TaskManager manager2 = new FileBackedTasksManager();

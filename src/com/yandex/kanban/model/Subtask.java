@@ -8,13 +8,13 @@ public class Subtask extends Task {
         super(name, description, status);
         this.epicTaskId = epicTaskId;
         this.type = TaskType.SUBTASK;
-        this.id = UUID.randomUUID();
     }
 
     public Subtask(String name, String description, TaskStatus status, UUID id, UUID epicTaskId) {
-        super(name, description, status, id);
+        super(name, description, status);
         this.epicTaskId = epicTaskId;
         this.type = TaskType.SUBTASK;
+        this.id = id;
     }
 
     @Override

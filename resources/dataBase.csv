@@ -1,9 +1,9 @@
 id,type,name,description,status,other
-494fe02c-a9a0-40cd-a7c0-b00df0fe3f4e,NORMAL,task1,description,NEW,null
-bd18c7ca-cef3-43e9-9773-4c808a19bf01,NORMAL,Task2,description,IN_PROGRESS,null
-a2b56ed5-f339-43a5-9623-0a7ce2c12e07,NORMAL,task1,description,NEW,null
-6cf90d91-378e-4df4-b3dd-fbe1c179ee6c,NORMAL,Task3,description,DONE,null
-73cfa0cf-e3cc-4eae-ac12-aebffa2177d1,EPIC_TASK,epicTask2,description,NEW,null
-f933f02c-04f8-45a5-8de0-f57eceef469c,SUBTASK,subtask1,description,NEW,73cfa0cf-e3cc-4eae-ac12-aebffa2177d1
+3a9c45e4-de84-46fa-bc7c-c39a2f8778b6,NORMAL,Task2,description,IN_PROGRESS,null
+68a66b91-af3c-4bfa-ba92-6085030edd7a,EPIC_TASK,epicTask2,description,NEW,null
+469f9ea0-0c23-49ae-beff-fd4657602e0f,NORMAL,Task3,description,DONE,null
+9be96994-9cc7-4901-baa3-42596ed837dc,SUBTASK,subtask1,description,NEW,68a66b91-af3c-4bfa-ba92-6085030edd7a
+7c45f9a4-a394-4eb8-9942-b2c41a609582,NORMAL,task1,description,NEW,null
+e0e87660-ffbd-47b9-8e82-6a5db17b04c5,NORMAL,task1,description,NEW,null
 
-a2b56ed5-f339-43a5-9623-0a7ce2c12e07
+7c45f9a4-a394-4eb8-9942-b2c41a609582
