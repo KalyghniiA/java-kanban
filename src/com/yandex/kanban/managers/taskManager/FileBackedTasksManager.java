@@ -1,5 +1,6 @@
 package com.yandex.kanban.managers.taskManager;
 
+import com.yandex.kanban.exception.TaskException;
 import com.yandex.kanban.model.*;
 import com.yandex.kanban.reader.Reader;
 import com.yandex.kanban.writer.Writer;
@@ -95,9 +96,24 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             }
         }
 
-        tasks.stream().filter(task -> task.getType() == TaskType.NORMAL).forEach(task -> database.put(task.getId(), task));
-        tasks.stream().filter(task -> task.getType() == TaskType.EPIC_TASK).forEach(task -> database.put(task.getId(), task));
-        tasks.stream().filter(task -> task.getType() == TaskType.SUBTASK).peek(task -> database.put(task.getId(), task)).forEach(task -> checkStatusToEpicTask((EpicTask) database.get( ((Subtask) task).getEpicTaskId())));
+        tasks.stream()
+                .filter(task -> task.getType() == TaskType.NORMAL)
+                .forEach(task -> database.put(task.getId(), task));
+        tasks.stream()
+                .filter(task -> task.getType() == TaskType.EPIC_TASK)
+                .forEach(task -> database.put(task.getId(), task));
+        tasks.stream()
+                .filter(task -> task.getType() == TaskType.SUBTASK)
+                .peek(task -> database.put(task.getId(), task))
+                .forEach(task -> {
+                   EpicTask epicTask = (EpicTask) database.get( ((Subtask) task).getEpicTaskId());
+                    try {
+                        epicTask.addSubtaskId(task.getId());
+                        checkStatusToEpicTask(epicTask);
+                    } catch (TaskException e) {
+                        System.out.println(e.getMessage());
+                    }
+                });
 
         //Посмотри внимательней, пожалуйста, есть вопросы по реализации, не лучше ли хранить в истории только айди
         //и сделать отдельный метод для восстановления истории в менеджере историй

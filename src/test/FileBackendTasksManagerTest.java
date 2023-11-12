@@ -63,12 +63,20 @@ public class FileBackendTasksManagerTest {
                 epicTask2.getId()
         );
         manager.createTask(subtask1);
+        subtask2  = new Subtask(
+                "subtask2",
+                "description",
+                TaskStatus.IN_PROGRESS,
+                epicTask2.getId()
+        );
+        manager.createTask(subtask2);
 
         TaskManager manager2 = new FileBackedTasksManager();
 
         assertAll(
                 () -> assertEquals(manager.getAllTasks().size(), manager2.getAllTasks().size()),
-                () -> assertEquals(manager.getHistory().size(), manager2.getHistory().size())
+                () -> assertEquals(manager.getHistory().size(), manager2.getHistory().size()),
+                () -> assertEquals(manager.getTask(epicTask2.getId()).getStatus(), manager2.getTask(epicTask2.getId()).getStatus())
         );
     }
 
