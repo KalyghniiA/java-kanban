@@ -1,13 +1,18 @@
 package com.yandex.kanban.model;
 
 import com.yandex.kanban.exception.TaskException;
+import com.yandex.kanban.util.UtilConstant;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class EpicTask extends Task {
     List<UUID> subtasksId;
+    LocalDateTime endTime;
     public EpicTask(String name, String description) {
         super(name, description, TaskStatus.NEW);
         this.subtasksId = new ArrayList<>();
@@ -64,6 +69,8 @@ public class EpicTask extends Task {
             return;
         }
 
+        checkTime(subtasks.stream().filter(subtask -> subtask.getStatus() != TaskStatus.DONE).collect(Collectors.toList()));
+
         int iterator = 0;
         for (Subtask task: subtasks) {
             if (task.getStatus().equals(TaskStatus.IN_PROGRESS)) {
@@ -83,4 +90,37 @@ public class EpicTask extends Task {
         }
     }
 
+    private void checkTime(List<Subtask> subtasks) {
+        int iterator = 0;
+        for (Subtask task: subtasks) {
+            if (task.getStartTime() == null || task.getDuration() == null) {
+                iterator++;
+                continue;
+            }
+
+            LocalDateTime startTimeSubtask = LocalDateTime.parse(task.getStartTime(), UtilConstant.DATE_TIME_FORMATTER);
+            LocalDateTime endTimeSubtask = LocalDateTime.parse(task.getEndTime(), UtilConstant.DATE_TIME_FORMATTER);
+
+            if (this.startTime == null && this.endTime == null) {
+                this.startTime = startTimeSubtask;
+                this.endTime = endTimeSubtask;
+            }
+
+            if (this.startTime != null && this.startTime.isAfter(startTimeSubtask)) {
+                this.startTime = startTimeSubtask;
+            }
+
+            if (this.endTime != null && this.endTime.isBefore(endTimeSubtask)) {
+                this.endTime = endTimeSubtask;
+            }
+        }
+
+        if (this.startTime != null && this.endTime != null && iterator != subtasks.size()) {
+            this.duration = Duration.between(this.startTime, this.endTime);
+        } else if (this.startTime != null && this.endTime != null && iterator == subtasks.size()) {
+            this.startTime = null;
+            this.endTime = null;
+            this.duration = null;
+        }
+    }
 }

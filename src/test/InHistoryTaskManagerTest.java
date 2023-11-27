@@ -46,6 +46,7 @@ public class InHistoryTaskManagerTest {
     @BeforeEach
     void createManagers() {
         manager = Managers.getDefaultTaskManager();
+        manager.removeAllTasks();
         manager.createTask(task1);
         manager.createTask(task2);
         manager.createTask(task3);

@@ -4,11 +4,10 @@ import com.yandex.kanban.exception.DatabaseException;
 import com.yandex.kanban.exception.TaskException;
 import com.yandex.kanban.managers.Managers;
 import com.yandex.kanban.managers.historyManager.HistoryManager;
-import com.yandex.kanban.model.Task;
-import com.yandex.kanban.model.TaskType;
-import com.yandex.kanban.model.EpicTask;
-import com.yandex.kanban.model.Subtask;
+import com.yandex.kanban.model.*;
+import com.yandex.kanban.util.UtilConstant;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -16,10 +15,21 @@ public class InMemoryTaskManager implements TaskManager{
 
     protected final Map<UUID, Task> database;
     protected final HistoryManager history;
+    protected final Set<Task> priorityTasks = new TreeSet<>((o1, o2) -> {
+        if (o1.getStartTime() == null && o2.getStartTime() == null) return o1.getId().compareTo(o2.getId());
+        if (o1.getStartTime() == null) return 1;
+        if (o2.getStartTime() == null) return -1;
+
+        LocalDateTime startTimeO1 = LocalDateTime.parse(o1.getStartTime(), UtilConstant.DATE_TIME_FORMATTER);
+        LocalDateTime startTimeO2 = LocalDateTime.parse(o2.getStartTime(), UtilConstant.DATE_TIME_FORMATTER);
+
+        return startTimeO1.compareTo(startTimeO2);
+    });
 
     public InMemoryTaskManager() {
         database = new HashMap<>();
         history = Managers.getDefaultHistoryManager();
+
     }
 
     @Override
@@ -32,13 +42,17 @@ public class InMemoryTaskManager implements TaskManager{
             if (database.containsKey(task.getId())) {
                 throw new DatabaseException("Данная задача уже существует");
             }
-        } catch (DatabaseException e) {
+            if (intersectionCheck(task)) {
+                throw new TaskException("Время выполнения данной задачи пересекается с действующими задачами");
+            };
+        } catch (DatabaseException | TaskException e) {
             System.out.println(e.getMessage());
             return;
         }
 
         task.setId(UUID.randomUUID());
         database.put(task.getId(), task);
+
 
         if (task.getType() == TaskType.SUBTASK) {
             try {
@@ -58,6 +72,7 @@ public class InMemoryTaskManager implements TaskManager{
                 System.out.println(e.getMessage());
             }
         }
+        checkPriority();
     }
 
     @Override
@@ -98,6 +113,7 @@ public class InMemoryTaskManager implements TaskManager{
     public void removeAllTasks() {
         database.clear();
         history.clear();
+        checkPriority();
     }
 
     @Override
@@ -107,6 +123,7 @@ public class InMemoryTaskManager implements TaskManager{
                 .filter(task -> task.getType() == TaskType.NORMAL)
                 .collect(Collectors.toList());
         tasks.forEach(task -> this.removeTask(task.getId()));
+        checkPriority();
     }
 
     @Override
@@ -116,6 +133,7 @@ public class InMemoryTaskManager implements TaskManager{
                 .filter(task -> task.getType() == TaskType.SUBTASK)
                 .collect(Collectors.toList());
         tasks.forEach(task -> removeTask(task.getId()));
+        checkPriority();
     }
 
     @Override
@@ -125,6 +143,7 @@ public class InMemoryTaskManager implements TaskManager{
                 .filter(task -> task.getType() == TaskType.EPIC_TASK)
                 .collect(Collectors.toList());
         tasks.forEach(task -> this.removeTask(task.getId()));
+        checkPriority();
     }
 
     @Override
@@ -159,13 +178,18 @@ public class InMemoryTaskManager implements TaskManager{
                 throw new DatabaseException("Данной задачи нет");
             }
 
+            if (intersectionCheck(task)) {
+                throw new TaskException("Данная задача пресекается по времени с действующими задачами");
+            }
+
             database.replace(task.getId(), task);
 
             if (task.getType() == TaskType.SUBTASK) {
                 EpicTask epicTask = (EpicTask) database.get(((Subtask) task).getEpicTaskId());
                 checkStatusToEpicTask(epicTask);
             }
-        } catch (DatabaseException e) {
+            checkPriority();
+        } catch (DatabaseException | TaskException e) {
             System.out.println(e.getMessage());
         }
     }
@@ -205,6 +229,7 @@ public class InMemoryTaskManager implements TaskManager{
                 System.out.println(e.getMessage());
             }
         }
+        checkPriority();
     }
 
     @Override
@@ -240,6 +265,11 @@ public class InMemoryTaskManager implements TaskManager{
         return history.getHistory();
     }
 
+    @Override
+    public List<Task> getPriority() {
+        return List.copyOf(priorityTasks);
+    }
+
     protected void checkStatusToEpicTask(EpicTask task) {
         try {
             if (task == null) {
@@ -258,6 +288,56 @@ public class InMemoryTaskManager implements TaskManager{
             }
         }
         task.checkStatus(subtasks);
+    }
+
+    protected void checkPriority() {
+        this.priorityTasks.clear();
+        for(Task taskData: this.database.values()) {
+            if (taskData.getType() == TaskType.EPIC_TASK || taskData.getStatus() == TaskStatus.DONE) continue;
+            this.priorityTasks.add(taskData);
+        }
+    }
+
+    protected boolean intersectionCheck(Task task) {
+       if (task.getStartTime() == null || task.getEndTime() == null) return false;
+
+       LocalDateTime startTimeTask = LocalDateTime.parse(task.getStartTime(), UtilConstant.DATE_TIME_FORMATTER);
+       LocalDateTime endTimeTask = LocalDateTime.parse(task.getEndTime(), UtilConstant.DATE_TIME_FORMATTER);
+
+       List<Task> tasks = priorityTasks.stream().collect(Collectors.toList());
+       int left = 0;
+       int right = tasks.size() - 1;
+
+       while (left <= right) {
+           int mid = (left + right) / 2;
+           Task elem = tasks.get(mid);
+
+           if (elem.getStartTime() == null) {
+               right = mid - 1;
+               continue;
+           }
+
+           LocalDateTime currentStart = LocalDateTime.parse(elem.getStartTime(), UtilConstant.DATE_TIME_FORMATTER);
+           LocalDateTime currentEnd = LocalDateTime.parse(elem.getEndTime(), UtilConstant.DATE_TIME_FORMATTER);
+
+           int compare = currentStart.compareTo(startTimeTask);
+
+           if (compare == 0) {
+               return true;
+           } else if (compare < 0) {
+               if (currentEnd.isAfter(startTimeTask)) {
+                   return true;
+               }
+               left = mid + 1;
+           } else {
+               if (endTimeTask.isAfter(currentStart)) {
+                   return true;
+               }
+               right = mid - 1;
+           }
+
+       }
+       return false;
     }
 
 }

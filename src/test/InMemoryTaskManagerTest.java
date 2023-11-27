@@ -1,5 +1,6 @@
 package test;
 
+import com.yandex.kanban.exception.TaskException;
 import com.yandex.kanban.managers.Managers;
 import com.yandex.kanban.managers.taskManager.TaskManager;
 import com.yandex.kanban.model.EpicTask;
@@ -43,10 +44,43 @@ class InMemoryTaskManagerTest {
     );
     Subtask subtask1;
     Subtask subtask2;
+    Task task4;
+    Task task5;
+    Task task6;
+    Subtask subtask3;
+    Subtask subtask4;
+
 
     @BeforeEach
     void createManager() {
-        manager = Managers.getDefaultTaskManager();
+        manager = Managers.getMemoryTaskManager();
+
+        try {
+            task4 = new Task(
+                    "name",
+                    "description",
+                    TaskStatus.NEW,
+                    "10:00 01.01.2023",
+                    "20"
+            );
+            task5 = new Task(
+                    "name",
+                    "description",
+                    TaskStatus.NEW,
+                    "10:21 01.01.2023",
+                    "20"
+            );
+
+            task6 = new Task(
+                    "name",
+                    "description",
+                    TaskStatus.NEW,
+                    "10:40 01.01.2023",
+                    "20"
+            );
+        } catch (TaskException e) {
+            System.out.println(e.getMessage());
+        }
 
     }
 
@@ -586,5 +620,133 @@ class InMemoryTaskManagerTest {
         manager.replaceTask(newSubtask);
 
         assertEquals(epicTask2.getStatus(), TaskStatus.IN_PROGRESS);
+    }
+
+    @Test
+    void checkPriorityTasks() {
+        manager.createTask(task5);
+        manager.createTask(task4);
+        manager.createTask(task1);
+        manager.createTask(task2);
+        manager.createTask(task3);
+
+
+        assertAll(
+                () -> assertEquals(5, manager.getPriority().size()),
+                () -> assertEquals(task4, manager.getPriority().get(0)),
+                () -> assertEquals(task5, manager.getPriority().get(1))
+        );
+    }
+
+    @Test
+    void checkIntersection() {
+        manager.createTask(task4);
+        manager.createTask(task5);
+        manager.createTask(task6);
+
+
+
+        assertAll(
+                () -> assertEquals(2, manager.getPriority().size()),
+                () -> assertEquals(2, manager.getAllTasks().size()),
+                () -> assertFalse(manager.getAllTasks().contains(task6))
+        );
+    }
+
+    @Test
+    void checkIntersection2() {
+        manager.createTask(task1);
+        manager.createTask(task2);
+        manager.createTask(task3);
+        manager.createTask(task4);
+        manager.createTask(task5);
+        manager.createTask(task6);
+
+
+
+        assertAll(
+                () -> assertEquals(5, manager.getPriority().size()),
+                () -> assertEquals(5, manager.getAllTasks().size()),
+                () -> assertFalse(manager.getAllTasks().contains(task6))
+        );
+    }
+
+    @Test
+    void checkTimeToEpicTask() {
+        String startTime = "10:00 01.01.2020";
+        String endTime = "11:40 01.01.2020";
+        String duration = "1:40";
+
+        try {
+            manager.createTask(epicTask1);
+            subtask3 = new Subtask("name", "description", TaskStatus.NEW, epicTask1.getId(), startTime, "20");
+            subtask4 = new Subtask("name", "description", TaskStatus.IN_PROGRESS, epicTask1.getId(), "10:20 01.01.2020", "1:20");
+            manager.createTask(subtask3);
+            manager.createTask(subtask4);
+
+            assertAll(
+                    () -> assertEquals(startTime, epicTask1.getStartTime()),
+                    () -> assertEquals(endTime, epicTask1.getEndTime()),
+                    () -> assertEquals(duration, epicTask1.getDuration()),
+                    () -> assertEquals(manager.getPriority().size(), 2),
+                    () -> assertEquals(manager.getPriority().get(0), subtask3)
+            );
+
+        } catch (TaskException e) {
+            System.out.println(e.getMessage());
+        }
+
+    }
+
+    @Test
+    void checkTimeToEpicTask2() {
+        String startTime = "10:00 01.01.2020";
+        String endTime = "11:40 02.01.2020";
+        String duration = "25:40";
+
+        try {
+            manager.createTask(epicTask1);
+            subtask3 = new Subtask("name", "description", TaskStatus.NEW, epicTask1.getId(), startTime, "20");
+            subtask4 = new Subtask("name", "description", TaskStatus.IN_PROGRESS, epicTask1.getId(), "10:20 02.01.2020", "1:20");
+            manager.createTask(subtask3);
+            manager.createTask(subtask4);
+
+            assertAll(
+                    () -> assertEquals(startTime, epicTask1.getStartTime()),
+                    () -> assertEquals(endTime, epicTask1.getEndTime()),
+                    () -> assertEquals(duration, epicTask1.getDuration()),
+                    () -> assertEquals(manager.getPriority().size(), 2),
+                    () -> assertEquals(manager.getPriority().get(0), subtask3)
+            );
+
+        } catch (TaskException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    @Test
+    void checkTimeToEpicTask3() {
+        String startTime = "10:00 01.01.2020";
+        String endTime = "10:20 01.01.2020";
+        String duration = "0:20";
+
+        try {
+            manager.createTask(epicTask1);
+            subtask3 = new Subtask("name", "description", TaskStatus.NEW, epicTask1.getId(), startTime, "20");
+            subtask4 = new Subtask("name", "description", TaskStatus.DONE, epicTask1.getId(), "10:20 01.01.2020", "1:20");
+            manager.createTask(subtask3);
+            manager.createTask(subtask4);
+
+            assertAll(
+                    () -> assertEquals(startTime, epicTask1.getStartTime()),
+                    () -> assertEquals(endTime, epicTask1.getEndTime()),
+                    () -> assertEquals(duration, epicTask1.getDuration()),
+                    () -> assertEquals(manager.getPriority().size(), 1),
+                    () -> assertEquals(manager.getPriority().get(0), subtask3)
+            );
+
+        } catch (TaskException e) {
+            System.out.println(e.getMessage());
+        }
     }
 }

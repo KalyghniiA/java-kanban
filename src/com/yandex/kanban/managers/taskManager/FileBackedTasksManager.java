@@ -115,8 +115,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     }
                 });
 
-        //Посмотри внимательней, пожалуйста, есть вопросы по реализации, не лучше ли хранить в истории только айди
-        //и сделать отдельный метод для восстановления истории в менеджере историй
         historyData.stream().map(UUID::fromString).forEach(super::getTask);
 
     }
@@ -124,11 +122,23 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     private Task lineToTask(String[] line) throws IOException {
         switch (TaskType.valueOf(line[1])) {
             case NORMAL:
-                return new Task(line[2], line[3], TaskStatus.valueOf(line[4]), UUID.fromString(line[0]));
+                try {
+                    return line[5].equals("null")
+                            ? new Task(line[2], line[3], TaskStatus.valueOf(line[4]), UUID.fromString(line[0]))
+                            : new Task(line[2], line[3], TaskStatus.valueOf(line[4]), UUID.fromString(line[0]), line[5], line[6]);
+                } catch (TaskException e) {
+                    System.out.println(e.getMessage());
+                }
             case EPIC_TASK:
                 return new EpicTask(line[2], line[3], UUID.fromString(line[0]));
             case SUBTASK:
-                return new Subtask(line[2], line[3], TaskStatus.valueOf(line[4]), UUID.fromString(line[0]), UUID.fromString(line[5]));
+                try {
+                    return line[5].equals("null")
+                            ? new Subtask(line[2], line[3], TaskStatus.valueOf(line[4]), UUID.fromString(line[0]), UUID.fromString(line[7]))
+                            : new Subtask(line[2], line[3], TaskStatus.valueOf(line[4]), UUID.fromString(line[0]), UUID.fromString(line[7]), line[5], line[6]);
+                } catch (TaskException e) {
+                    System.out.println(e.getMessage());
+                }
             default:
                 throw new IOException();
         }
