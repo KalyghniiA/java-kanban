@@ -69,7 +69,7 @@ public class EpicTask extends Task {
             return;
         }
 
-        checkTime(subtasks.stream().filter(subtask -> subtask.getStatus() != TaskStatus.DONE).collect(Collectors.toList()));
+        checkTime(subtasks);
 
         int iterator = 0;
         for (Subtask task: subtasks) {

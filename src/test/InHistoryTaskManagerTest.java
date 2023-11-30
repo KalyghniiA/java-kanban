@@ -120,66 +120,13 @@ public class InHistoryTaskManagerTest {
     }
 
     @Test
-    @Disabled
-    void getHistoryToNormalTasks() {
-        manager.getAllNormalTask();
-
-        List<Task> testingList = List.of(task1, task2, task3);
-
-        assertAll(
-                () -> assertEquals(manager.getHistory().size(), testingList.size()),
-                () -> assertTrue(manager.getHistory().containsAll(testingList))
-        );
-    }
-
-    @Test
-    @Disabled
-    void getHistoryToEpicTasks() {
-        manager.getAllEpicTask();
-
-        List<Task> testingList = List.of(epicTask1, epicTask2);
-
-        assertAll(
-                () -> assertEquals(manager.getHistory().size(), testingList.size()),
-                () -> assertTrue(manager.getHistory().containsAll(testingList))
-        );
-    }
-
-    @Test
-    @Disabled
-    void getHistoryToSubtasks() {
-        manager.getAllSubtask();
-
-        List<Task> testingList = List.of(subtask1, subtask2);
-
-        assertAll(
-                () -> assertEquals(manager.getHistory().size(), testingList.size()),
-                () -> assertTrue(manager.getHistory().containsAll(testingList))
-        );
-    }
-
-    @Test
-    @Disabled
-    void getHistoryToAllTasks() {
-        manager.getAllTasks();
-
-        List<Task> testingList = List.of(task1, task2, task3, epicTask1, epicTask2, subtask1, subtask2);
-
-        assertAll(
-                () -> assertEquals(manager.getHistory().size(), testingList.size()),
-                () -> assertTrue(manager.getHistory().containsAll(testingList))
-        );
-    }
-
-    @Test
-    @Disabled
     void getHistoryRemoveTask() {
-        manager.getAllNormalTask();
+        manager.getTask(task1.getId());
+        manager.getTask(task2.getId());
         manager.removeTask(task1.getId());
 
         List<Task> testingList = new LinkedList<>();
         testingList.add(task2);
-        testingList.add(task3);
 
         assertAll(
                 () -> assertTrue(testingList.containsAll(manager.getHistory())),
@@ -324,15 +271,8 @@ public class InHistoryTaskManagerTest {
     }
 
     @Test
-    @Disabled
-    void getHistorySubtasksToEpic() {
-        manager.getSubtasksToEpicTask(epicTask2.getId());
-
-        List<Task> testingList = List.of(subtask1, subtask2);
-
-        assertAll(
-                () -> assertTrue(testingList.containsAll(manager.getHistory())),
-                () -> assertEquals(testingList.size(), manager.getHistory().size())
-        );
+    void getEmptyHistory() {
+        List<Task> history = manager.getHistory();
+        assertTrue(history.isEmpty());
     }
 }

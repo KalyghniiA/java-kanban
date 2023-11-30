@@ -52,6 +52,7 @@ public class InMemoryTaskManager implements TaskManager{
 
         task.setId(UUID.randomUUID());
         database.put(task.getId(), task);
+        if (task.getType() != TaskType.EPIC_TASK) priorityTasks.add(task);
 
 
         if (task.getType() == TaskType.SUBTASK) {
@@ -72,7 +73,6 @@ public class InMemoryTaskManager implements TaskManager{
                 System.out.println(e.getMessage());
             }
         }
-        checkPriority();
     }
 
     @Override
@@ -113,7 +113,7 @@ public class InMemoryTaskManager implements TaskManager{
     public void removeAllTasks() {
         database.clear();
         history.clear();
-        checkPriority();
+        priorityTasks.clear();
     }
 
     @Override
@@ -123,7 +123,6 @@ public class InMemoryTaskManager implements TaskManager{
                 .filter(task -> task.getType() == TaskType.NORMAL)
                 .collect(Collectors.toList());
         tasks.forEach(task -> this.removeTask(task.getId()));
-        checkPriority();
     }
 
     @Override
@@ -133,7 +132,6 @@ public class InMemoryTaskManager implements TaskManager{
                 .filter(task -> task.getType() == TaskType.SUBTASK)
                 .collect(Collectors.toList());
         tasks.forEach(task -> removeTask(task.getId()));
-        checkPriority();
     }
 
     @Override
@@ -143,7 +141,6 @@ public class InMemoryTaskManager implements TaskManager{
                 .filter(task -> task.getType() == TaskType.EPIC_TASK)
                 .collect(Collectors.toList());
         tasks.forEach(task -> this.removeTask(task.getId()));
-        checkPriority();
     }
 
     @Override
@@ -181,14 +178,15 @@ public class InMemoryTaskManager implements TaskManager{
             if (intersectionCheck(task)) {
                 throw new TaskException("Данная задача пресекается по времени с действующими задачами");
             }
-
+            Task oldTask = database.get(task.getId());
+            priorityTasks.remove(oldTask);
             database.replace(task.getId(), task);
+            priorityTasks.add(task);
 
             if (task.getType() == TaskType.SUBTASK) {
                 EpicTask epicTask = (EpicTask) database.get(((Subtask) task).getEpicTaskId());
                 checkStatusToEpicTask(epicTask);
             }
-            checkPriority();
         } catch (DatabaseException | TaskException e) {
             System.out.println(e.getMessage());
         }
@@ -210,6 +208,7 @@ public class InMemoryTaskManager implements TaskManager{
 
         Task task = database.remove(id);
         history.remove(task.getId());
+        priorityTasks.remove(task);
 
         if (task.getType() == TaskType.EPIC_TASK) {
             List<UUID> subtasksId = ((EpicTask) task).getSubtasksId();
@@ -229,7 +228,6 @@ public class InMemoryTaskManager implements TaskManager{
                 System.out.println(e.getMessage());
             }
         }
-        checkPriority();
     }
 
     @Override
@@ -288,14 +286,6 @@ public class InMemoryTaskManager implements TaskManager{
             }
         }
         task.checkStatus(subtasks);
-    }
-
-    protected void checkPriority() {
-        this.priorityTasks.clear();
-        for(Task taskData: this.database.values()) {
-            if (taskData.getType() == TaskType.EPIC_TASK || taskData.getStatus() == TaskStatus.DONE) continue;
-            this.priorityTasks.add(taskData);
-        }
     }
 
     protected boolean intersectionCheck(Task task) {
