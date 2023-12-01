@@ -7,7 +7,6 @@ import com.yandex.kanban.model.Subtask;
 import com.yandex.kanban.model.Task;
 import com.yandex.kanban.model.TaskStatus;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedList;

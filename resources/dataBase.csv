@@ -1,8 +1,0 @@
-id,type,name,description,status,other
-7d2fce1a-be09-41a5-958c-3ca4e6e9fedd,NORMAL,Task2,description,IN_PROGRESS,null,null,null
-48c075fa-5a94-4960-abc7-1c33a81aa5f7,EPIC_TASK,epicTask2,description,NEW,null,null,null
-66e667cb-fd33-43b3-9944-4c8a5a4a05b2,NORMAL,Task3,description,DONE,null,null,null
-7cc06080-231a-4bbf-820e-6c1f83424e68,NORMAL,task1,description,NEW,null,null,null
-d7f9db72-f1f5-434b-8431-312311972b1e,EPIC_TASK,epicTask1,description,NEW,null,null,null
-
-7cc06080-231a-4bbf-820e-6c1f83424e68,7d2fce1a-be09-41a5-958c-3ca4e6e9fedd,66e667cb-fd33-43b3-9944-4c8a5a4a05b2,d7f9db72-f1f5-434b-8431-312311972b1e,48c075fa-5a94-4960-abc7-1c33a81aa5f7

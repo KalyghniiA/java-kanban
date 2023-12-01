@@ -15,7 +15,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TaskManagerTest<M extends TaskManager> {
+public abstract class TaskManagerTest<M extends TaskManager> {
    protected M manager;
     Task task1 = new Task(
             "task1",
