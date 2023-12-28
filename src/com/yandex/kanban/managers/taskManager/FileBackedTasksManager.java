@@ -19,7 +19,7 @@ import static com.yandex.kanban.util.PathConstant.*;
 
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
-    public FileBackedTasksManager() {
+    public void start () {
         this.readFile();
     }
 

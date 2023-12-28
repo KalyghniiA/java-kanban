@@ -21,49 +21,6 @@ import java.time.LocalDateTime;
 
 public class Main {
     public static void main(String[] args) throws TaskException, DatabaseException, IOException, KVClientException {
-        KVServer kvServer = new KVServer();
-        kvServer.start();
-
-        TaskManager manager = Managers.getDefaultTaskManager();
-        Task task1 = new Task(
-                "task1",
-                "description",
-                TaskStatus.NEW
-        );
-        Task task2 = new Task(
-                "Task2",
-                "description",
-                TaskStatus.IN_PROGRESS
-        );
-        Task task3 = new Task(
-                "Task3",
-                "description",
-                TaskStatus.DONE
-        );
-
-        EpicTask epicTask1 = new EpicTask(
-                "epicTask1",
-                "description"
-        );
-
-        manager.createTask(task1);
-        manager.createTask(task2);
-        manager.createTask(task3);
-        manager.createTask(epicTask1);
-
-         Subtask subtask1 = new Subtask(
-                "subtask1",
-                "description",
-                TaskStatus.NEW,
-                epicTask1.getId()
-        );
-        manager.createTask(subtask1);
-
-
-
-        HttpTaskServer server = new HttpTaskServer(manager);
-        server.start();
-
     }
 }
 

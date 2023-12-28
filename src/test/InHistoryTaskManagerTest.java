@@ -1,24 +1,35 @@
 package test;
 
+import com.yandex.kanban.exception.DatabaseException;
+import com.yandex.kanban.exception.KVClientException;
+import com.yandex.kanban.exception.TaskException;
+import com.yandex.kanban.kvserver.KVServer;
 import com.yandex.kanban.managers.Managers;
 import com.yandex.kanban.managers.taskManager.TaskManager;
 import com.yandex.kanban.model.EpicTask;
 import com.yandex.kanban.model.Subtask;
 import com.yandex.kanban.model.Task;
 import com.yandex.kanban.model.TaskStatus;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import com.yandex.kanban.server.HttpTaskServer;
+import com.yandex.kanban.util.UtilConstant;
+import org.junit.jupiter.api.*;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled
+
 public class InHistoryTaskManagerTest {
     TaskManager manager;
-    /*
+    KVServer kvServer;
+    HttpTaskServer server;
+    TestHttpClient testClient = new TestHttpClient();
+    String path = "http://localhost:8080/tasks/";
+    String pathHistory = path + "history";
+    String pathTask = path + "task/";
+
     Task task1 = new Task(
             "task1",
             "description",
@@ -46,9 +57,15 @@ public class InHistoryTaskManagerTest {
     Subtask subtask2;
 
     @BeforeEach
-    void createManagers() {
+    void createManagers() throws KVClientException, TaskException, DatabaseException, IOException {
+        kvServer = new KVServer();
+        kvServer.start();
+
+
         manager = Managers.getDefaultTaskManager();
-        manager.removeAllTasks();
+        server = new HttpTaskServer(manager);
+        server.start();
+
         manager.createTask(task1);
         manager.createTask(task2);
         manager.createTask(task3);
@@ -70,23 +87,29 @@ public class InHistoryTaskManagerTest {
 
         manager.createTask(subtask1);
         manager.createTask(subtask2);
+    }
+    @AfterEach
+    void stopServer() {
+        server.stop();
+        kvServer.stop();
 
     }
 
     @Test
     void getHistoryOneTask() {
-        manager.getTask(task1.getId());
+        testClient.get(String.format("%s?id=%s", pathTask, task1.getId().toString()));
 
-        List<Task> testingList = List.of(task1);
+        String testingList = UtilConstant.GSON.toJson(List.of(task1));
 
-        assertEquals(testingList, manager.getHistory());
+        assertEquals(testingList, testClient.get(pathHistory));
+
     }
 
     @Test
     void getHistoryThreeTask() {
-        manager.getTask(task1.getId());
-        manager.getTask(task2.getId());
-        manager.getTask(task3.getId());
+        testClient.get(String.format("%s?id=%s", pathTask, task1.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, task2.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, task3.getId().toString()));
 
         List<Task> testingList = new LinkedList<>();
         testingList.add(task1);
@@ -102,7 +125,7 @@ public class InHistoryTaskManagerTest {
     }
 
     @Test
-    void getHistoryRepeatTask() {
+    void getHistoryRepeatTask() throws KVClientException, TaskException, DatabaseException {
         manager.getTask(task1.getId());
         manager.getTask(task2.getId());
         manager.getTask(task3.getId());
@@ -122,7 +145,7 @@ public class InHistoryTaskManagerTest {
     }
 
     @Test
-    void getHistoryRemoveTask() {
+    void getHistoryRemoveTask() throws KVClientException, TaskException, DatabaseException {
         manager.getTask(task1.getId());
         manager.getTask(task2.getId());
         manager.removeTask(task1.getId());
@@ -137,7 +160,7 @@ public class InHistoryTaskManagerTest {
     }
 
     @Test
-    void getHistoryRemoveTask2() {
+    void getHistoryRemoveTask2() throws KVClientException, TaskException, DatabaseException {
         manager.getTask(task1.getId());
         manager.getTask(task2.getId());
         manager.getTask(task3.getId());
@@ -165,7 +188,7 @@ public class InHistoryTaskManagerTest {
     }
 
     @Test
-    void getHistoryRemoveNormalTasks() {
+    void getHistoryRemoveNormalTasks() throws KVClientException, TaskException, DatabaseException {
         manager.getTask(task1.getId());
         manager.getTask(task2.getId());
         manager.getTask(task3.getId());
@@ -192,7 +215,7 @@ public class InHistoryTaskManagerTest {
     }
 
     @Test
-    void getHistoryRemoveSubtasks() {
+    void getHistoryRemoveSubtasks() throws KVClientException, TaskException, DatabaseException {
         manager.getTask(task1.getId());
         manager.getTask(task2.getId());
         manager.getTask(task3.getId());
@@ -219,7 +242,7 @@ public class InHistoryTaskManagerTest {
     }
 
     @Test
-    void getHistoryRemoveEpicTasks() {
+    void getHistoryRemoveEpicTasks() throws KVClientException, TaskException, DatabaseException {
         manager.getTask(task1.getId());
         manager.getTask(task2.getId());
         manager.getTask(task3.getId());
@@ -244,7 +267,7 @@ public class InHistoryTaskManagerTest {
     }
 
     @Test
-    void getHistoryRemoveAllTasks() {
+    void getHistoryRemoveAllTasks() throws KVClientException, TaskException, DatabaseException {
         manager.getTask(task1.getId());
         manager.getTask(task2.getId());
         manager.getTask(task3.getId());
@@ -258,7 +281,7 @@ public class InHistoryTaskManagerTest {
     }
 
     @Test
-    void getHistoryRemoveAllTasksAndGetTask() {
+    void getHistoryRemoveAllTasksAndGetTask() throws KVClientException, TaskException, DatabaseException {
         manager.getTask(task1.getId());
         manager.getTask(task2.getId());
         manager.getTask(task3.getId());
@@ -276,5 +299,7 @@ public class InHistoryTaskManagerTest {
     void getEmptyHistory() {
         List<Task> history = manager.getHistory();
         assertTrue(history.isEmpty());
-    }*/
+    }
+
+ */
 }

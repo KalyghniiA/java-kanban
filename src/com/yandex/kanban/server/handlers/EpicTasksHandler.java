@@ -3,16 +3,16 @@ package com.yandex.kanban.server.handlers;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.yandex.kanban.managers.taskManager.TaskManager;
+import com.yandex.kanban.util.UtilConstant;
 
 import java.io.IOException;
 
 public class EpicTasksHandler extends HandlerTemplate {
     private final TaskManager manager;
-    private final Gson gson;
 
-    public EpicTasksHandler(TaskManager manager, Gson gson) {
+
+    public EpicTasksHandler(TaskManager manager) {
         this.manager = manager;
-        this.gson = gson;
     }
 
     @Override
@@ -20,7 +20,7 @@ public class EpicTasksHandler extends HandlerTemplate {
         String result;
         switch(exchange.getRequestMethod()) {
             case "GET":
-                result = gson.toJson(manager.getAllEpicTask());
+                result = UtilConstant.GSON.toJson(manager.getAllEpicTask());
                 generateResponse(200, result, exchange);
                 return;
             case "DELETE":

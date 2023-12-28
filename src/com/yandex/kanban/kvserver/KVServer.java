@@ -113,7 +113,8 @@ public class KVServer {
     }
 
     public void stop() {
-        server.stop(PORT);
+        server.stop(0);
+        System.out.println("Сервер остановлен");
     }
 
     private String generateApiToken() {

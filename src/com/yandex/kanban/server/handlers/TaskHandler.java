@@ -1,7 +1,5 @@
 package com.yandex.kanban.server.handlers;
 
-import com.google.gson.Gson;
-import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.yandex.kanban.exception.DatabaseException;
 import com.yandex.kanban.exception.KVClientException;
@@ -10,21 +8,18 @@ import com.yandex.kanban.managers.taskManager.TaskManager;
 import com.yandex.kanban.model.EpicTask;
 import com.yandex.kanban.model.Subtask;
 import com.yandex.kanban.model.Task;
+import com.yandex.kanban.util.UtilConstant;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.UUID;
 
 public class TaskHandler extends HandlerTemplate{
     private final TaskManager manager;
-    private final Gson gson;
-
-    public TaskHandler(TaskManager manager, Gson gson) {
+    public TaskHandler(TaskManager manager) {
         this.manager = manager;
-        this.gson = gson;
     }
     @Override
     public void handle(HttpExchange exchange) throws IOException {
@@ -45,7 +40,7 @@ public class TaskHandler extends HandlerTemplate{
                 if (options != null && options.getId() != null) {
                     try {
                         Task task = manager.getTask(options.getId());
-                        result = gson.toJson(task);
+                        result = UtilConstant.GSON.toJson(task);
                         code = 200;
                         break;
                     } catch (DatabaseException | KVClientException e) {
@@ -59,7 +54,7 @@ public class TaskHandler extends HandlerTemplate{
                         result = "На данный момент база пуста";
                         code = 406;
                     } else {
-                        result = gson.toJson(tasks);
+                        result = UtilConstant.GSON.toJson(tasks);
                         code = 200;
                     }
                     break;
@@ -70,11 +65,12 @@ public class TaskHandler extends HandlerTemplate{
                     bodyJson = new String(is.readAllBytes(), Charset.defaultCharset());
                     Task newTask;
                     if (bodyJson.contains("NORMAL")) {
-                        newTask = gson.fromJson(bodyJson, Task.class);
+                        newTask = UtilConstant.GSON.fromJson(bodyJson, Task.class);
                     } else if (bodyJson.contains("EPIC")) {
-                        newTask = gson.fromJson(bodyJson, EpicTask.class);
+                        EpicTask data = UtilConstant.GSON.fromJson(bodyJson, EpicTask.class);
+                        newTask = new EpicTask(data.getName(), data.getDescription(), data.getId());//ПРОБЛЕМА!!
                     } else if (bodyJson.contains("SUBTASK")) {
-                        newTask = gson.fromJson(bodyJson, Subtask.class);
+                        newTask = UtilConstant.GSON.fromJson(bodyJson, Subtask.class);
                     } else {
                         result = "Неизвестный тип задачи";
                         code = 400;
