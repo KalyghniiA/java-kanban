@@ -11,17 +11,15 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class EpicTask extends Task {
-    List<UUID> subtasksId;
+    List<UUID> subtasksId = new ArrayList<>();
     LocalDateTime endTime;
     public EpicTask(String name, String description) {
         super(name, description, TaskStatus.NEW);
-        this.subtasksId = new ArrayList<>();
         this.type = TaskType.EPIC_TASK;
     }
 
     public EpicTask(String name, String description, UUID id) {
         super(name, description, TaskStatus.NEW);
-        this.subtasksId = new ArrayList<>();
         this.type = TaskType.EPIC_TASK;
         this.id = id;
     }

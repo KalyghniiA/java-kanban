@@ -1,14 +1,17 @@
 package com.yandex.kanban.managers.taskManager;
 
+import com.yandex.kanban.exception.DatabaseException;
+import com.yandex.kanban.exception.KVClientException;
+import com.yandex.kanban.exception.TaskException;
 import com.yandex.kanban.model.Task;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface TaskManager {
-    void createTask(Task task);
+    void createTask(Task task) throws DatabaseException, TaskException, KVClientException;
 
-    void createTasks(List<Task> tasks);
+    void createTasks(List<Task> tasks) throws DatabaseException, TaskException, KVClientException;
 
     List<Task> getAllTasks();
 
@@ -18,21 +21,21 @@ public interface TaskManager {
 
     List<Task> getAllEpicTask();
 
-    void removeAllTasks();
+    void removeAllTasks() throws DatabaseException, TaskException, KVClientException;
 
-    void removeAllNormalTask();
+    void removeAllNormalTask() throws KVClientException;
 
-    void removeAllSubtasks();
+    void removeAllSubtasks() throws KVClientException;
 
-    void removeAllEpicTask();
+    void removeAllEpicTask() throws KVClientException;
 
-    Task getTask(UUID id);
+    Task getTask(UUID id) throws DatabaseException, KVClientException;
 
-    void replaceTask(Task task);
+    void replaceTask(Task task) throws DatabaseException, TaskException, KVClientException;
 
-    void removeTask(UUID id);
+    void removeTask(UUID id) throws DatabaseException, TaskException, KVClientException;
 
-    List<Task> getSubtasksToEpicTask(UUID id);
+    List<Task> getSubtasksToEpicTask(UUID id) throws DatabaseException, TaskException, KVClientException;
 
     List<Task> getHistory();
     List<Task> getPriority();

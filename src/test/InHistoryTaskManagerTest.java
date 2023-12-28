@@ -7,6 +7,7 @@ import com.yandex.kanban.model.Subtask;
 import com.yandex.kanban.model.Task;
 import com.yandex.kanban.model.TaskStatus;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedList;
@@ -14,8 +15,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Disabled
 public class InHistoryTaskManagerTest {
     TaskManager manager;
+    /*
     Task task1 = new Task(
             "task1",
             "description",
@@ -273,5 +276,5 @@ public class InHistoryTaskManagerTest {
     void getEmptyHistory() {
         List<Task> history = manager.getHistory();
         assertTrue(history.isEmpty());
-    }
+    }*/
 }

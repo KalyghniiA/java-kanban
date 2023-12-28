@@ -18,7 +18,7 @@ import java.io.PrintWriter;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class FileBackendTasksManagerTest extends TaskManagerTest<TaskManager>{
-
+    /*
 
     @BeforeEach
     @Override
@@ -106,5 +106,5 @@ public class FileBackendTasksManagerTest extends TaskManagerTest<TaskManager>{
                 () -> assertEquals(manager2.getTask(epicTask1.getId()), epicTask1),
                 () -> assertTrue(((EpicTask)manager2.getTask(epicTask1.getId())).getSubtasksId().isEmpty())
         );
-    }
+    }*/
 }

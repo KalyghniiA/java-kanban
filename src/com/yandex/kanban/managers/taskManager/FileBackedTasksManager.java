@@ -1,5 +1,7 @@
 package com.yandex.kanban.managers.taskManager;
 
+import com.yandex.kanban.exception.DatabaseException;
+import com.yandex.kanban.exception.KVClientException;
 import com.yandex.kanban.exception.TaskException;
 import com.yandex.kanban.model.*;
 import com.yandex.kanban.reader.Reader;
@@ -11,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.yandex.kanban.util.PathConstant.*;
 
@@ -19,62 +22,63 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     public FileBackedTasksManager() {
         this.readFile();
     }
+
     @Override
-    public void createTask(Task task) {
+    public void createTask(Task task) throws DatabaseException, TaskException, KVClientException {
         super.createTask(task);
         save();
     }
 
     @Override
-    public void createTasks(List<Task> tasks) {
+    public void createTasks(List<Task> tasks) throws DatabaseException, TaskException, KVClientException {
         super.createTasks(tasks);
         save();
     }
 
     @Override
-    public void replaceTask(Task task) {
+    public void replaceTask(Task task) throws DatabaseException, TaskException, KVClientException {
         super.replaceTask(task);
         save();
     }
 
     @Override
-    public void removeTask(UUID id) {
+    public void removeTask(UUID id) throws DatabaseException, TaskException, KVClientException {
         super.removeTask(id);
         save();
     }
 
     @Override
-    public void removeAllTasks() {
+    public void removeAllTasks() throws  KVClientException {
         super.removeAllTasks();
         save();
     }
 
     @Override
-    public void removeAllNormalTask() {
+    public void removeAllNormalTask() throws KVClientException {
         super.removeAllNormalTask();
         save();
     }
 
     @Override
-    public void removeAllSubtasks() {
+    public void removeAllSubtasks() throws KVClientException {
         super.removeAllSubtasks();
         save();
     }
 
     @Override
-    public void removeAllEpicTask() {
+    public void removeAllEpicTask() throws KVClientException {
         super.removeAllEpicTask();
         save();
     }
 
     @Override
-    public Task getTask(UUID id) {
+    public Task getTask(UUID id) throws DatabaseException, KVClientException {
         Task task = super.getTask(id);
         save();
         return task;
     }
 
-    private void readFile() {
+    protected void readFile() {
         Map<String, List<String>> dataForFile = Reader.read(RESOURCE + FILE_NAME);
         List<Task> tasks = new ArrayList<>();
         List<String> tasksData = dataForFile.get("tasks");
@@ -115,7 +119,14 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                     }
                 });
 
-        historyData.stream().map(UUID::fromString).forEach(super::getTask);
+        try {
+            List<UUID> historyId = historyData.stream().map(UUID::fromString).collect(Collectors.toList());
+            for (var id: historyId) {
+                super.getTask(id);
+            }
+        } catch (DatabaseException | KVClientException e) {
+            System.out.println(e.getMessage());
+        }
 
     }
 
@@ -144,7 +155,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         }
     }
 
-    private void save() {
+    protected void save() throws KVClientException {
         try {
             if (!Files.exists(PATH)) {
                 Files.createFile(PATH);

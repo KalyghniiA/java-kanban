@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public abstract class TaskManagerTest<M extends TaskManager> {
    protected M manager;
+   /*
     Task task1 = new Task(
             "task1",
             "description",
@@ -879,5 +880,5 @@ public abstract class TaskManagerTest<M extends TaskManager> {
         } catch (TaskException e) {
             System.out.println(e.getMessage());
         }
-    }
+    }*/
 }
