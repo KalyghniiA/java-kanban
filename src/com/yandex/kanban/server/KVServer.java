@@ -1,4 +1,4 @@
-package com.yandex.kanban.kvserver;
+package com.yandex.kanban.server;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 

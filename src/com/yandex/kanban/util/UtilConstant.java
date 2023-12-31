@@ -2,8 +2,8 @@ package com.yandex.kanban.util;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.yandex.kanban.server.type_adapters.DurationTypeAdapter;
-import com.yandex.kanban.server.type_adapters.LocalDateTimeTypeAdapter;
+import com.yandex.kanban.server.typeAdapters.DurationTypeAdapter;
+import com.yandex.kanban.server.typeAdapters.LocalDateTimeTypeAdapter;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

@@ -1,5 +1,8 @@
 package test;
 
+import com.yandex.kanban.exception.DatabaseException;
+import com.yandex.kanban.exception.KVClientException;
+import com.yandex.kanban.exception.TaskException;
 import com.yandex.kanban.managers.Managers;
 import com.yandex.kanban.managers.taskManager.FileBackedTasksManager;
 import com.yandex.kanban.managers.taskManager.TaskManager;
@@ -18,13 +21,13 @@ import java.io.PrintWriter;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class FileBackendTasksManagerTest extends TaskManagerTest<TaskManager>{
-    /*
+
 
     @BeforeEach
     @Override
-    void createManager() {
+    void createManager() throws IOException, KVClientException {
         super.createManager();
-        manager = Managers.getDefaultTaskManager();
+        manager = Managers.getFileTaskManager();
     }
 
     @AfterEach
@@ -36,7 +39,7 @@ public class FileBackendTasksManagerTest extends TaskManagerTest<TaskManager>{
     }
 
     @Test
-    void createTask() {
+    void createTask() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(task1);
         manager.createTask(task2);
         manager.createTask(task3);
@@ -66,7 +69,7 @@ public class FileBackendTasksManagerTest extends TaskManagerTest<TaskManager>{
     }
 
     @Test
-    void clear() {
+    void clear() throws DatabaseException, KVClientException, TaskException {
         manager.removeAllTasks();
 
         TaskManager manager2 = new FileBackedTasksManager();
@@ -78,7 +81,7 @@ public class FileBackendTasksManagerTest extends TaskManagerTest<TaskManager>{
     }
 
     @Test
-    void historyTest() {
+    void historyTest() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(task1);
         manager.getTask(task1.getId());
 
@@ -97,7 +100,7 @@ public class FileBackendTasksManagerTest extends TaskManagerTest<TaskManager>{
     }
 
     @Test
-    void checkEpic() {
+    void checkEpic() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(epicTask1);
 
         TaskManager manager2 = new FileBackedTasksManager();
@@ -106,5 +109,5 @@ public class FileBackendTasksManagerTest extends TaskManagerTest<TaskManager>{
                 () -> assertEquals(manager2.getTask(epicTask1.getId()), epicTask1),
                 () -> assertTrue(((EpicTask)manager2.getTask(epicTask1.getId())).getSubtasksId().isEmpty())
         );
-    }*/
+    }
 }

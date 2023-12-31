@@ -77,7 +77,7 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
 
         List<Task> result = new LinkedList<>();
-        CustomLinkedList.Node<Task> next = null;
+        CustomLinkedList.Node<Task> next;
 
         try {
             next = history.getFirst();

@@ -1,4 +1,4 @@
-package com.yandex.kanban.server.type_adapters;
+package com.yandex.kanban.server.typeAdapters;
 
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;

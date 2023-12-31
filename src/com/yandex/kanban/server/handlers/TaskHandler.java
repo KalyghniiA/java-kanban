@@ -8,15 +8,16 @@ import com.yandex.kanban.managers.taskManager.TaskManager;
 import com.yandex.kanban.model.EpicTask;
 import com.yandex.kanban.model.Subtask;
 import com.yandex.kanban.model.Task;
+import com.yandex.kanban.util.OptionsPath;
 import com.yandex.kanban.util.UtilConstant;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.List;
-import java.util.UUID;
 
-public class TaskHandler extends HandlerTemplate{
+
+public class TaskHandler extends HandlerTemplate {
     private final TaskManager manager;
     public TaskHandler(TaskManager manager) {
         this.manager = manager;
@@ -25,11 +26,11 @@ public class TaskHandler extends HandlerTemplate{
     public void handle(HttpExchange exchange) throws IOException {
         String params = exchange.getRequestURI().getQuery();
         String result = "Ошибка сервера";
-        Options options = null;
+        OptionsPath options = null;
         int code = 500;
 
         if (params != null) {
-            options = new Options();
+            options = new OptionsPath();
             options.setOptions(params.split("&"));
         }
 
@@ -79,7 +80,7 @@ public class TaskHandler extends HandlerTemplate{
 
                     try {
                         manager.createTask(newTask);
-                        result = String.format("Задача создана и ей присвоен id %s", newTask.getId());
+                        result = String.format("Задача создана и ей присвоен id=%s", newTask.getId());
                         code = 200;
                         break;
                     } catch (DatabaseException | TaskException | KVClientException e) {
@@ -118,29 +119,5 @@ public class TaskHandler extends HandlerTemplate{
         }
 
         generateResponse(code, result, exchange);
-    }
-
-    //Задел на возможное расширение по параметрам
-    private static class Options {
-        private UUID id;
-
-        public UUID getId() {
-            return id;
-        }
-
-        public void setOptions(String[] params) {
-            for (String option: params) {
-                String key = option.substring(0, option.indexOf("="));
-                String value = option.substring(option.indexOf("=") + 1);
-
-                switch (key) {
-                    case "id":
-                        this.id = UUID.fromString(value);
-                        break;
-                    default:
-                        System.out.println("Незарегистрированный параметр:" + key);
-                }
-            }
-        }
     }
 }

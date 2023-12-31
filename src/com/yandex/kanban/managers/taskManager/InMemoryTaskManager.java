@@ -39,17 +39,17 @@ public class InMemoryTaskManager implements TaskManager{
         if (task == null) {
             throw new DatabaseException("Передан пустой элемент");
         }
-
         if (database.containsKey(task.getId())) {
             throw new DatabaseException("Данная задача уже существует");
         }
         if (intersectionCheck(task)) {
             throw new TaskException("Время выполнения данной задачи пересекается с действующими задачами");
-        };
+        }
 
 
         task.setId(UUID.randomUUID());
-        database.put(task.getId(), task);
+
+
         if (task.getType() != TaskType.EPIC_TASK) priorityTasks.add(task);
 
 
@@ -57,11 +57,15 @@ public class InMemoryTaskManager implements TaskManager{
             if (!database.containsKey(((Subtask) task).getEpicTaskId())) {
                 throw new DatabaseException("Для данной подзадачи нет главной задачи");
             }
+            database.put(task.getId(), task);
             EpicTask epicTask = (EpicTask) database.get(((Subtask) task).getEpicTaskId());
             epicTask.addSubtaskId(task.getId());
             checkStatusToEpicTask(epicTask);
-
+            return;
         }
+
+        database.put(task.getId(), task);
+
     }
 
     @Override
@@ -116,6 +120,7 @@ public class InMemoryTaskManager implements TaskManager{
         tasks.forEach(task -> {
             try {
                 this.removeTask(task.getId());
+
             } catch (DatabaseException | TaskException | KVClientException e) {
                 System.out.println(e.getMessage());
             }
@@ -131,6 +136,7 @@ public class InMemoryTaskManager implements TaskManager{
         tasks.forEach(task -> {
             try {
                 removeTask(task.getId());
+
             } catch (DatabaseException | TaskException | KVClientException e) {
                 System.out.println(e.getMessage());
             }
@@ -146,6 +152,7 @@ public class InMemoryTaskManager implements TaskManager{
         tasks.forEach(task -> {
             try {
                 this.removeTask(task.getId());
+
             } catch (DatabaseException | TaskException | KVClientException e) {
                 System.out.println(e.getMessage());
             }
@@ -237,7 +244,6 @@ public class InMemoryTaskManager implements TaskManager{
         Task task = database.get(id);
         if (!(task.getType() == TaskType.EPIC_TASK)) {
             throw new TaskException(String.format("У задачи с переданным id не может быть подзадач. Тип данной задачи: %s%n", task.getClass()));
-
         }
         List<Task> subtasks = new ArrayList<>();
         List<UUID> subtasksId = ((EpicTask) task).getSubtasksId();

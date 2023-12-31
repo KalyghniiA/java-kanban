@@ -1,18 +1,12 @@
 package com.yandex.kanban.server;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpServer;
 import com.yandex.kanban.managers.taskManager.TaskManager;
 import com.yandex.kanban.server.handlers.*;
-import com.yandex.kanban.server.type_adapters.DurationTypeAdapter;
-import com.yandex.kanban.server.type_adapters.LocalDateTimeTypeAdapter;
 
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.time.Duration;
-import java.time.LocalDateTime;
 
 public class HttpTaskServer {
     private static final int PORT = 8080;
@@ -29,7 +23,8 @@ public class HttpTaskServer {
             server.bind(new InetSocketAddress(PORT), 0);
             server.createContext("/tasks/", new PriorityTasksHandler(manager));
             server.createContext("/tasks/task/", new TaskHandler(manager));
-            server.createContext("/tasks/subtasks/", new SubtaskHandler(manager));
+            server.createContext("/tasks/normal/", new NormalTaskHandler(manager));
+            server.createContext("/tasks/subtask/", new SubtaskHandler(manager));
             server.createContext("/tasks/epic/", new EpicTasksHandler(manager));
             server.createContext("/tasks/history", new HistoryHandler(manager));
 

@@ -20,14 +20,12 @@ public class PriorityTasksHandler extends HandlerTemplate {
         }
         String result;
 
-        switch (exchange.getRequestMethod()) {
-            case "GET":
-                result = UtilConstant.GSON.toJson(manager.getPriority());
-                generateResponse(200, result, exchange);
-                return;
-            default:
-                result = "Данный путь не может принимать запросы по методу " + exchange.getRequestMethod();
-                generateResponse(405, result, exchange);
+        if (exchange.getRequestMethod().equals("GET")) {
+            result = UtilConstant.GSON.toJson(manager.getPriority());
+            generateResponse(200, result, exchange);
+        } else {
+            result = "Данный путь не может принимать запросы по методу " + exchange.getRequestMethod();
+            generateResponse(405, result, exchange);
         }
 
     }

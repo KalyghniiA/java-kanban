@@ -7,31 +7,30 @@ import com.yandex.kanban.util.UtilConstant;
 
 import java.io.IOException;
 
-public class EpicTasksHandler extends HandlerTemplate {
-    private final TaskManager manager;
-
-
-    public EpicTasksHandler(TaskManager manager) {
+public class NormalTaskHandler extends HandlerTemplate {
+    TaskManager manager;
+    public NormalTaskHandler(TaskManager manager) {
         this.manager = manager;
     }
-
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         String result;
-        switch(exchange.getRequestMethod()) {
+
+        switch (exchange.getRequestMethod()) {
             case "GET":
-                result = UtilConstant.GSON.toJson(manager.getAllEpicTask());
+                result = UtilConstant.GSON.toJson(manager.getAllNormalTask());
                 generateResponse(200, result, exchange);
                 return;
             case "DELETE":
                 try {
-                    manager.removeAllEpicTask();
+                    result = "Все задачи удалены";
+                    manager.removeAllNormalTask();
+                    generateResponse(200, result, exchange);
+                    return;
                 } catch (KVClientException e) {
-                    System.out.println(e.getMessage());
+                    generateResponse(500, e.getMessage(), exchange);
+                    break;
                 }
-                result = "Все задачи со статусом Эпик удалены";
-                generateResponse(200, result, exchange);
-                return;
             default:
                 result = "Данный путь не может принимать запросы по методу " + exchange.getRequestMethod();
                 generateResponse(405, result, exchange);

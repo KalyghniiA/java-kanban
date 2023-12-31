@@ -1,4 +1,4 @@
-package com.yandex.kanban.server.type_adapters;
+package com.yandex.kanban.server.typeAdapters;
 
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
@@ -7,7 +7,6 @@ import com.yandex.kanban.util.UtilConstant;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 public class LocalDateTimeTypeAdapter extends TypeAdapter<LocalDateTime> {
     @Override

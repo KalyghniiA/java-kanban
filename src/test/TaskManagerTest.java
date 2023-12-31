@@ -1,5 +1,7 @@
 package test;
 
+import com.yandex.kanban.exception.DatabaseException;
+import com.yandex.kanban.exception.KVClientException;
 import com.yandex.kanban.exception.TaskException;
 import com.yandex.kanban.managers.taskManager.TaskManager;
 import com.yandex.kanban.model.EpicTask;
@@ -9,6 +11,7 @@ import com.yandex.kanban.model.TaskStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public abstract class TaskManagerTest<M extends TaskManager> {
    protected M manager;
-   /*
+
     Task task1 = new Task(
             "task1",
             "description",
@@ -50,7 +53,7 @@ public abstract class TaskManagerTest<M extends TaskManager> {
     Subtask subtask4;
 
     @BeforeEach
-    void createManager() {
+    void createManager() throws IOException, KVClientException {
         try {
             task4 = new Task(
                     "name",
@@ -80,7 +83,7 @@ public abstract class TaskManagerTest<M extends TaskManager> {
     }
 
     @Test
-    void createTask() {
+    void createTask() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(task1);
         manager.createTask(task2);
         manager.createTask(task3);
@@ -95,7 +98,7 @@ public abstract class TaskManagerTest<M extends TaskManager> {
     }
 
     @Test
-    void createTasks() {
+    void createTasks() throws DatabaseException, KVClientException, TaskException {
         List<Task> tasks = List.of(task1, task2, task3);
 
         List<Task> testingTasks = List.of(task1, task2, task3);
@@ -110,30 +113,29 @@ public abstract class TaskManagerTest<M extends TaskManager> {
     }
 
     @Test
-    void createSubtaskNotEpic() {
+    void createSubtaskNotEpic() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(task1);
-        manager.createTask(subtask1);
-
         subtask1 = new Subtask(
                 "subtask1",
                 "description",
                 TaskStatus.NEW,
                 epicTask2.getId()
         );
+        final DatabaseException e = assertThrows(DatabaseException.class, () -> manager.createTask(subtask1));
 
         List<Task> testingList = List.of(task1,subtask1);
 
         assertAll(
                 () -> assertFalse(manager.getAllTasks().containsAll(testingList)),
-                () -> assertNull(manager.getTask(subtask1.getId())),
-                () -> assertEquals(List.of(task1), manager.getAllTasks())
+                () -> assertEquals(List.of(task1), manager.getAllTasks()),
+                () -> assertEquals(e.getMessage(), "Для данной подзадачи нет главной задачи")
         );
     }
 
     @Test
-    void createTasksRepeatTask() {
+    void createTasksRepeatTask() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(task1);
-        manager.createTask(task1);
+        final DatabaseException exception = assertThrows(DatabaseException.class, () -> manager.createTask(task1));
         manager.createTask(task2);
         manager.createTask(task3);
 
@@ -143,12 +145,13 @@ public abstract class TaskManagerTest<M extends TaskManager> {
         assertAll(
                 () -> assertTrue(manager.getAllTasks().containsAll(testingTasks)),
                 () -> assertEquals(3, manager.getAllTasks().size()),
-                () -> assertFalse(manager.getAllTasks().isEmpty())
+                () -> assertFalse(manager.getAllTasks().isEmpty()),
+                () -> assertEquals("Данная задача уже существует", exception.getMessage())
         );
     }
 
     @Test
-    void createEpicTaskEmptySubtasks() {
+    void createEpicTaskEmptySubtasks() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(epicTask1);
 
         Task task = manager.getTask(epicTask1.getId());
@@ -160,7 +163,7 @@ public abstract class TaskManagerTest<M extends TaskManager> {
     }
 
     @Test
-    void checkEpicStatusToInProgress() {
+    void checkEpicStatusToInProgress() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(epicTask2);
 
         subtask1 = new Subtask(
@@ -188,7 +191,7 @@ public abstract class TaskManagerTest<M extends TaskManager> {
     }
 
     @Test
-    void checkEpicStatusToInProgress2() {
+    void checkEpicStatusToInProgress2() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(epicTask2);
         subtask1 = new Subtask(
                 "subtask1",
@@ -210,7 +213,7 @@ public abstract class TaskManagerTest<M extends TaskManager> {
     }
 
     @Test
-    void checkEpicStatusToInProgress3() {
+    void checkEpicStatusToInProgress3() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(epicTask2);
         subtask1 = new Subtask(
                 "subtask1",
@@ -232,7 +235,7 @@ public abstract class TaskManagerTest<M extends TaskManager> {
     }
 
     @Test
-    void checkEpicStatusToDone() {
+    void checkEpicStatusToDone() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(epicTask2);
         subtask1 = new Subtask(
                 "subtask1",
@@ -253,7 +256,7 @@ public abstract class TaskManagerTest<M extends TaskManager> {
     }
 
     @Test
-    void checkEpicStatusToDeleteSubtask() {
+    void checkEpicStatusToDeleteSubtask() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(epicTask2);
         subtask1 = new Subtask(
                 "subtask1",
@@ -291,7 +294,7 @@ public abstract class TaskManagerTest<M extends TaskManager> {
     }
 
     @Test
-    void getTask() {
+    void getTask() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(task1);
         manager.createTask(task2);
         manager.createTask(task3);
@@ -299,13 +302,12 @@ public abstract class TaskManagerTest<M extends TaskManager> {
         assertAll(
                 () -> assertEquals(manager.getTask(task1.getId()), task1),
                 () -> assertEquals(manager.getTask(task2.getId()), task2),
-                () -> assertNotNull(manager.getTask(task3.getId())),
-                () -> assertNull(manager.getTask(epicTask1.getId()))
+                () -> assertNotNull(manager.getTask(task3.getId()))
         );
     }
 
     @Test
-    void getNormalTasks() {
+    void getNormalTasks() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(task1);
         manager.createTask(task2);
         manager.createTask(task3);
@@ -322,7 +324,7 @@ public abstract class TaskManagerTest<M extends TaskManager> {
     }
 
     @Test
-    void getNormalTasksIsEmptyList() {
+    void getNormalTasksIsEmptyList() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(epicTask1);
         manager.createTask(epicTask2);
 
@@ -333,7 +335,7 @@ public abstract class TaskManagerTest<M extends TaskManager> {
     }
 
     @Test
-    void getEpicTasks() {
+    void getEpicTasks() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(task1);
         manager.createTask(task2);
         manager.createTask(task3);
@@ -350,7 +352,7 @@ public abstract class TaskManagerTest<M extends TaskManager> {
     }
 
     @Test
-    void getEpicTasksIsEmptyList() {
+    void getEpicTasksIsEmptyList() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(task1);
         manager.createTask(task2);
         manager.createTask(task3);
@@ -362,7 +364,7 @@ public abstract class TaskManagerTest<M extends TaskManager> {
     }
 
     @Test
-    void getSubtasks() {
+    void getSubtasks() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(epicTask1);
         manager.createTask(epicTask2);
 
@@ -393,7 +395,7 @@ public abstract class TaskManagerTest<M extends TaskManager> {
     }
 
     @Test
-    void getSubtasksIsEmptyList() {
+    void getSubtasksIsEmptyList() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(task1);
 
         assertAll(
@@ -403,7 +405,7 @@ public abstract class TaskManagerTest<M extends TaskManager> {
     }
 
     @Test
-    void removeTask() {
+    void removeTask() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(task1);
         manager.createTask(task2);
         manager.createTask(task3);
@@ -418,7 +420,7 @@ public abstract class TaskManagerTest<M extends TaskManager> {
     }
 
     @Test
-    void removeSubtask() {
+    void removeSubtask() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(epicTask2);
 
         //Очередная проблема с созданием id
@@ -452,7 +454,7 @@ public abstract class TaskManagerTest<M extends TaskManager> {
     }
 
     @Test
-    void removeEpicTask() {
+    void removeEpicTask() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(epicTask1);
         manager.createTask(epicTask2);
 
@@ -473,31 +475,30 @@ public abstract class TaskManagerTest<M extends TaskManager> {
         manager.createTask(subtask1);
         manager.createTask(subtask2);
         manager.removeTask(epicTask2.getId());
+        final DatabaseException e = assertThrows(DatabaseException.class, () -> manager.getTask(subtask1.getId()));
 
         List<Task> testingList = List.of(epicTask1);
 
         assertAll(
                 () -> assertEquals(testingList, manager.getAllTasks()),
                 () -> assertTrue(manager.getAllSubtask().isEmpty()),
-                () -> assertNull(manager.getTask(subtask1.getId()))
+                () -> assertEquals(e.getMessage(), "Данной задачи нет")
         );
     }
 
     @Test
-    void removeAllTasks() {
+    void removeAllTasks() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(task1);
         manager.createTask(task2);
         manager.createTask(task3);
         manager.removeAllTasks();
 
-        assertAll(
-                () -> assertTrue(manager.getAllTasks().isEmpty()),
-                () -> assertNull(manager.getTask(task1.getId()))
-        );
+        assertTrue(manager.getAllTasks().isEmpty());
+
     }
 
     @Test
-    void removeAllNormalTasks() {
+    void removeAllNormalTasks() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(task1);
         manager.createTask(task2);
         manager.createTask(task3);
@@ -532,7 +533,7 @@ public abstract class TaskManagerTest<M extends TaskManager> {
     }
 
     @Test
-    void removeAllSubtasks() {
+    void removeAllSubtasks() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(epicTask1);
         manager.createTask(epicTask2);
 
@@ -565,7 +566,7 @@ public abstract class TaskManagerTest<M extends TaskManager> {
     }
 
     @Test
-    void removeAllEpicTasks() {
+    void removeAllEpicTasks() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(task1);
         manager.createTask(task2);
         manager.createTask(task3);
@@ -601,7 +602,7 @@ public abstract class TaskManagerTest<M extends TaskManager> {
     }
 
     @Test
-    void getSubtasksToEpicTask() {
+    void getSubtasksToEpicTask() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(epicTask1);
         manager.createTask(epicTask2);
 
@@ -632,7 +633,7 @@ public abstract class TaskManagerTest<M extends TaskManager> {
     }
 
     @Test
-    void checkStatusEpicTaskToNew() {
+    void checkStatusEpicTaskToNew() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(epicTask2);
         subtask1 = new Subtask(
                 "subtask1",
@@ -649,7 +650,7 @@ public abstract class TaskManagerTest<M extends TaskManager> {
     }
 
     @Test
-    void checkStatusEpicTaskToInProgress() {
+    void checkStatusEpicTaskToInProgress() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(epicTask2);
         subtask1 = new Subtask(
                 "subtask1",
@@ -672,7 +673,7 @@ public abstract class TaskManagerTest<M extends TaskManager> {
     }
 
     @Test
-    void checkStatusEpicTaskToReplaceSubtask() {
+    void checkStatusEpicTaskToReplaceSubtask() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(epicTask2);
         subtask1 = new Subtask(
                 "subtask1",
@@ -697,7 +698,7 @@ public abstract class TaskManagerTest<M extends TaskManager> {
     }
 
     @Test
-    void checkStatusEpicTaskToDoneStatusSubtask() {
+    void checkStatusEpicTaskToDoneStatusSubtask() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(epicTask2);
         subtask1 = new Subtask(
                 "subtask1",
@@ -721,7 +722,7 @@ public abstract class TaskManagerTest<M extends TaskManager> {
     }
 
     @Test
-    void checkStatusEpicTaskToOneTaskDone() {
+    void checkStatusEpicTaskToOneTaskDone() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(epicTask2);
         subtask1 = new Subtask(
                 "subtask1",
@@ -753,7 +754,7 @@ public abstract class TaskManagerTest<M extends TaskManager> {
     }
 
     @Test
-    void checkPriorityTasks() {
+    void checkPriorityTasks() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(task5);
         manager.createTask(task4);
         manager.createTask(task1);
@@ -769,40 +770,44 @@ public abstract class TaskManagerTest<M extends TaskManager> {
     }
 
     @Test
-    void checkIntersection() {
+    void checkIntersection() throws DatabaseException, KVClientException, TaskException {
         manager.createTask(task4);
         manager.createTask(task5);
-        manager.createTask(task6);
+        final TaskException e = assertThrows(TaskException.class, () -> manager.createTask(task6));
 
 
 
         assertAll(
                 () -> assertEquals(2, manager.getPriority().size()),
                 () -> assertEquals(2, manager.getAllTasks().size()),
-                () -> assertFalse(manager.getAllTasks().contains(task6))
+                () -> assertFalse(manager.getAllTasks().contains(task6)),
+                () -> assertEquals(e.getMessage(), "Время выполнения данной задачи пересекается с действующими задачами")
         );
     }
 
     @Test
-    void checkIntersection2() {
+    void checkIntersection2() throws DatabaseException, KVClientException, TaskException{
         manager.createTask(task1);
         manager.createTask(task2);
         manager.createTask(task3);
         manager.createTask(task4);
         manager.createTask(task5);
-        manager.createTask(task6);
+        final TaskException exception = assertThrows(TaskException.class, () -> manager.createTask(task6));
+
+
 
 
 
         assertAll(
                 () -> assertEquals(5, manager.getPriority().size()),
                 () -> assertEquals(5, manager.getAllTasks().size()),
-                () -> assertFalse(manager.getAllTasks().contains(task6))
+                () -> assertFalse(manager.getAllTasks().contains(task6)),
+                () -> assertEquals("Время выполнения данной задачи пересекается с действующими задачами", exception.getMessage())
         );
     }
 
     @Test
-    void checkTimeToEpicTask() {
+    void checkTimeToEpicTask() throws DatabaseException, KVClientException, TaskException{
         String startTime = "10:00 01.01.2020";
         String endTime = "11:40 01.01.2020";
         String duration = "1:40";
@@ -829,56 +834,51 @@ public abstract class TaskManagerTest<M extends TaskManager> {
     }
 
     @Test
-    void checkTimeToEpicTask2() {
+    void checkTimeToEpicTask2() throws DatabaseException, KVClientException, TaskException {
         String startTime = "10:00 01.01.2020";
         String endTime = "11:40 02.01.2020";
         String duration = "25:40";
 
-        try {
-            manager.createTask(epicTask1);
-            subtask3 = new Subtask("name", "description", TaskStatus.NEW, epicTask1.getId(), startTime, "20");
-            subtask4 = new Subtask("name", "description", TaskStatus.IN_PROGRESS, epicTask1.getId(), "10:20 02.01.2020", "1:20");
-            manager.createTask(subtask3);
-            manager.createTask(subtask4);
+        manager.createTask(epicTask1);
+        subtask3 = new Subtask("name", "description", TaskStatus.NEW, epicTask1.getId(), startTime, "20");
+        subtask4 = new Subtask("name", "description", TaskStatus.IN_PROGRESS, epicTask1.getId(), "10:20 02.01.2020", "1:20");
+        manager.createTask(subtask3);
+        manager.createTask(subtask4);
 
 
-            assertAll(
-                    () -> assertEquals(startTime, epicTask1.getStartTime()),
-                    () -> assertEquals(endTime, epicTask1.getEndTime()),
-                    () -> assertEquals(duration, epicTask1.getDuration()),
-                    () -> assertEquals(manager.getPriority().size(), 2),
-                    () -> assertEquals(manager.getPriority().get(0), subtask3)
-            );
+        assertAll(
+                () -> assertEquals(startTime, epicTask1.getStartTime()),
+                () -> assertEquals(endTime, epicTask1.getEndTime()),
+                () -> assertEquals(duration, epicTask1.getDuration()),
+                () -> assertEquals(manager.getPriority().size(), 2),
+                () -> assertEquals(manager.getPriority().get(0), subtask3)
+        );
 
-        } catch (TaskException e) {
-            System.out.println(e.getMessage());
-        }
+
     }
 
     @Test
-    void checkTimeToEpicTask3() {
+    void checkTimeToEpicTask3() throws DatabaseException, KVClientException, TaskException {
         String startTime = "10:00 01.01.2020";
         String endTime = "11:40 01.01.2020";
         String duration = "1:40";
 
-        try {
-            manager.createTask(epicTask1);
-            subtask3 = new Subtask("name", "description", TaskStatus.NEW, epicTask1.getId(), startTime, "20");
-            subtask4 = new Subtask("name", "description", TaskStatus.DONE, epicTask1.getId(), "10:20 01.01.2020", "1:20");
-            manager.createTask(subtask3);
-            manager.createTask(subtask4);
 
-            System.out.println(manager.getPriority());
-            assertAll(
-                    () -> assertEquals(startTime, epicTask1.getStartTime()),
-                    () -> assertEquals(endTime, epicTask1.getEndTime()),
-                    () -> assertEquals(duration, epicTask1.getDuration()),
-                    () -> assertEquals(manager.getPriority().size(), 2),
-                    () -> assertEquals(manager.getPriority().get(0), subtask3)
-            );
+        manager.createTask(epicTask1);
+        subtask3 = new Subtask("name", "description", TaskStatus.NEW, epicTask1.getId(), startTime, "20");
+        subtask4 = new Subtask("name", "description", TaskStatus.DONE, epicTask1.getId(), "10:20 01.01.2020", "1:20");
+        manager.createTask(subtask3);
+        manager.createTask(subtask4);
 
-        } catch (TaskException e) {
-            System.out.println(e.getMessage());
-        }
-    }*/
+        System.out.println(manager.getPriority());
+        assertAll(
+                () -> assertEquals(startTime, epicTask1.getStartTime()),
+                () -> assertEquals(endTime, epicTask1.getEndTime()),
+                () -> assertEquals(duration, epicTask1.getDuration()),
+                () -> assertEquals(manager.getPriority().size(), 2),
+                () -> assertEquals(manager.getPriority().get(0), subtask3)
+        );
+
+
+    }
 }

@@ -3,7 +3,7 @@ package test;
 import com.yandex.kanban.exception.DatabaseException;
 import com.yandex.kanban.exception.KVClientException;
 import com.yandex.kanban.exception.TaskException;
-import com.yandex.kanban.kvserver.KVServer;
+import com.yandex.kanban.server.KVServer;
 import com.yandex.kanban.managers.Managers;
 import com.yandex.kanban.managers.taskManager.TaskManager;
 import com.yandex.kanban.model.EpicTask;
@@ -116,58 +116,45 @@ public class InHistoryTaskManagerTest {
         testingList.add(task2);
         testingList.add(task3);
 
-        assertAll(
-                () -> assertTrue(manager.getHistory().containsAll(testingList)),
-                () -> assertEquals(manager.getHistory().size(), testingList.size()),
-                () -> assertEquals(manager.getHistory().get(0), task1),
-                () -> assertEquals(manager.getHistory().get(2), task3)
-        );
+        assertEquals(testClient.get(pathHistory), UtilConstant.GSON.toJson(testingList));
     }
 
     @Test
-    void getHistoryRepeatTask() throws KVClientException, TaskException, DatabaseException {
-        manager.getTask(task1.getId());
-        manager.getTask(task2.getId());
-        manager.getTask(task3.getId());
-        manager.getTask(task1.getId());
+    void getHistoryRepeatTask() {
+        testClient.get(String.format("%s?id=%s", pathTask, task1.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, task2.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, task3.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, task1.getId().toString()));
 
         List<Task> testingList = new LinkedList<>();
         testingList.add(task2);
         testingList.add(task3);
         testingList.add(task1);
 
-        assertAll(
-                () -> assertTrue(testingList.containsAll(manager.getHistory())),
-                () -> assertEquals(testingList.size(), manager.getHistory().size()),
-                () -> assertEquals(task2, manager.getHistory().get(0)),
-                () -> assertEquals(task1, manager.getHistory().get(2))
-        );
+        assertEquals(testClient.get(pathHistory), UtilConstant.GSON.toJson(testingList));
     }
 
     @Test
-    void getHistoryRemoveTask() throws KVClientException, TaskException, DatabaseException {
-        manager.getTask(task1.getId());
-        manager.getTask(task2.getId());
-        manager.removeTask(task1.getId());
+    void getHistoryRemoveTask() {
+        testClient.get(String.format("%s?id=%s", pathTask, task1.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, task2.getId().toString()));
+        testClient.delete(String.format("%s?id=%s", pathTask, task1.getId().toString()));
 
         List<Task> testingList = new LinkedList<>();
         testingList.add(task2);
 
-        assertAll(
-                () -> assertTrue(testingList.containsAll(manager.getHistory())),
-                () -> assertEquals(testingList.size(), manager.getHistory().size())
-        );
+        assertEquals(testClient.get(pathHistory), UtilConstant.GSON.toJson(testingList));
     }
 
     @Test
-    void getHistoryRemoveTask2() throws KVClientException, TaskException, DatabaseException {
-        manager.getTask(task1.getId());
-        manager.getTask(task2.getId());
-        manager.getTask(task3.getId());
-        manager.getTask(epicTask1.getId());
-        manager.getTask(epicTask2.getId());
-        manager.getTask(subtask1.getId());
-        manager.getTask(subtask2.getId());
+    void getHistoryRemoveTask2() {
+        testClient.get(String.format("%s?id=%s", pathTask, task1.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, task2.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, task3.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, epicTask1.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, epicTask2.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, subtask1.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, subtask2.getId().toString()));
 
         List<Task> testingList = new LinkedList<>();
         testingList.add(task2);
@@ -177,25 +164,20 @@ public class InHistoryTaskManagerTest {
         testingList.add(subtask1);
         testingList.add(subtask2);
 
-        manager.removeTask(task1.getId());
+        testClient.delete(String.format("%s?id=%s", pathTask, task1.getId().toString()));
 
-        assertAll(
-                () -> assertTrue(testingList.containsAll(manager.getHistory())),
-                () -> assertEquals(testingList.size(), manager.getHistory().size()),
-                () -> assertEquals(task2, manager.getHistory().get(0)),
-                () -> assertEquals(subtask2, manager.getHistory().get(5))
-        );
+        assertEquals(testClient.get(pathHistory), UtilConstant.GSON.toJson(testingList));
     }
 
     @Test
-    void getHistoryRemoveNormalTasks() throws KVClientException, TaskException, DatabaseException {
-        manager.getTask(task1.getId());
-        manager.getTask(task2.getId());
-        manager.getTask(task3.getId());
-        manager.getTask(epicTask1.getId());
-        manager.getTask(epicTask2.getId());
-        manager.getTask(subtask1.getId());
-        manager.getTask(subtask2.getId());
+    void getHistoryRemoveNormalTasks() {
+        testClient.get(String.format("%s?id=%s", pathTask, task1.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, task2.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, task3.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, epicTask1.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, epicTask2.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, subtask1.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, subtask2.getId().toString()));
 
         List<Task> testingList = new LinkedList<>();
         testingList.add(epicTask1);
@@ -203,26 +185,22 @@ public class InHistoryTaskManagerTest {
         testingList.add(subtask1);
         testingList.add(subtask2);
 
-        manager.removeAllNormalTask();
+        testClient.delete(path + "normal/");
 
-        assertAll(
-                () -> assertTrue(testingList.containsAll(manager.getHistory())),
-                () -> assertEquals(testingList.size(), manager.getHistory().size()),
-                () -> assertEquals(epicTask1, manager.getHistory().get(0)),
-                () -> assertEquals(subtask2, manager.getHistory().get(3))
-        );
 
+
+        assertEquals(UtilConstant.GSON.toJson(testingList), testClient.get(pathHistory));
     }
 
     @Test
-    void getHistoryRemoveSubtasks() throws KVClientException, TaskException, DatabaseException {
-        manager.getTask(task1.getId());
-        manager.getTask(task2.getId());
-        manager.getTask(task3.getId());
-        manager.getTask(epicTask1.getId());
-        manager.getTask(epicTask2.getId());
-        manager.getTask(subtask1.getId());
-        manager.getTask(subtask2.getId());
+    void getHistoryRemoveSubtasks() {
+        testClient.get(String.format("%s?id=%s", pathTask, task1.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, task2.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, task3.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, epicTask1.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, epicTask2.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, subtask1.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, subtask2.getId().toString()));
 
         List<Task> testingList = new LinkedList<>();
         testingList.add(task1);
@@ -231,75 +209,52 @@ public class InHistoryTaskManagerTest {
         testingList.add(epicTask1);
         testingList.add(epicTask2);
 
-        manager.removeAllSubtasks();
+        testClient.delete(path + "subtask/");
 
-        assertAll(
-                () -> assertTrue(testingList.containsAll(manager.getHistory())),
-                () -> assertEquals(testingList.size(), manager.getHistory().size()),
-                () -> assertEquals(task1, manager.getHistory().get(0)),
-                () -> assertEquals(epicTask2, manager.getHistory().get(4))
-        );
+        assertEquals(UtilConstant.GSON.toJson(testingList), testClient.get(pathHistory));
     }
 
     @Test
-    void getHistoryRemoveEpicTasks() throws KVClientException, TaskException, DatabaseException {
-        manager.getTask(task1.getId());
-        manager.getTask(task2.getId());
-        manager.getTask(task3.getId());
-        manager.getTask(epicTask1.getId());
-        manager.getTask(epicTask2.getId());
-        manager.getTask(subtask1.getId());
-        manager.getTask(subtask2.getId());
+    void getHistoryRemoveEpicTasks() {
+        testClient.get(String.format("%s?id=%s", pathTask, task1.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, task2.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, task3.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, epicTask1.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, epicTask2.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, subtask1.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, subtask2.getId().toString()));
 
         List<Task> testingList = new LinkedList<>();
         testingList.add(task1);
         testingList.add(task2);
         testingList.add(task3);
 
-        manager.removeAllEpicTask();
+        testClient.delete(path + "epic/");
 
-        assertAll(
-                () -> assertTrue(testingList.containsAll(manager.getHistory())),
-                () -> assertEquals(testingList.size(), manager.getHistory().size()),
-                () -> assertEquals(task1, manager.getHistory().get(0)),
-                () -> assertEquals(task3, manager.getHistory().get(2))
-        );
+
+
+        assertEquals(UtilConstant.GSON.toJson(testingList), testClient.get(pathHistory));
     }
 
     @Test
-    void getHistoryRemoveAllTasks() throws KVClientException, TaskException, DatabaseException {
-        manager.getTask(task1.getId());
-        manager.getTask(task2.getId());
-        manager.getTask(task3.getId());
-        manager.getTask(epicTask1.getId());
-        manager.getTask(epicTask2.getId());
-        manager.getTask(subtask1.getId());
-        manager.getTask(subtask2.getId());
+    void getHistoryRemoveAllTasks() {
+        testClient.get(String.format("%s?id=%s", pathTask, task1.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, task2.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, task3.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, epicTask1.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, epicTask2.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, subtask1.getId().toString()));
+        testClient.get(String.format("%s?id=%s", pathTask, subtask2.getId().toString()));
 
-        manager.removeAllTasks();
-        assertTrue(manager.getHistory().isEmpty());
-    }
+        testClient.delete(pathTask);
 
-    @Test
-    void getHistoryRemoveAllTasksAndGetTask() throws KVClientException, TaskException, DatabaseException {
-        manager.getTask(task1.getId());
-        manager.getTask(task2.getId());
-        manager.getTask(task3.getId());
-        manager.removeAllTasks();
-        manager.createTask(task1);
-        manager.getTask(task1.getId());
-
-        assertAll(
-                () -> assertTrue(manager.getHistory().contains(task1)),
-                () -> assertEquals(1, manager.getHistory().size())
-        );
+        assertEquals("История пуста", testClient.get(pathHistory));
     }
 
     @Test
     void getEmptyHistory() {
-        List<Task> history = manager.getHistory();
-        assertTrue(history.isEmpty());
+        assertEquals("История пуста", testClient.get(pathHistory));
     }
 
- */
+
 }

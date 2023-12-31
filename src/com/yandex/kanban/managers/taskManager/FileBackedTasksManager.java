@@ -19,7 +19,7 @@ import static com.yandex.kanban.util.PathConstant.*;
 
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
-    public void start () {
+    public FileBackedTasksManager() {
         this.readFile();
     }
 
@@ -78,7 +78,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return task;
     }
 
-    protected void readFile() {
+    private void readFile() {
         Map<String, List<String>> dataForFile = Reader.read(RESOURCE + FILE_NAME);
         List<Task> tasks = new ArrayList<>();
         List<String> tasksData = dataForFile.get("tasks");

@@ -16,17 +16,11 @@ import com.yandex.kanban.util.UtilConstant;
 import java.util.UUID;
 
 public class HttpTaskManager extends FileBackedTasksManager {
-    private final String path;
     private final KVTaskClient client;
 
-    public HttpTaskManager() throws DatabaseException {
-        throw new DatabaseException("Данный класс не может использоваться без передачи аргументом пути к Базе Данных");
-    }
-
     public HttpTaskManager(String path) throws KVClientException {
-        this.path = path;
         client = new KVTaskClient(path);
-        this.readFile();//ПРОБЛЕМА!!
+        this.load();//ПРОБЛЕМА!!
     }
 
     @Override
@@ -35,8 +29,7 @@ public class HttpTaskManager extends FileBackedTasksManager {
         client.put("history", UtilConstant.GSON.toJson(getHistory()));
     }
 
-    @Override
-    protected void readFile() {
+    protected void load() {
         String dataTasksJson;
         String dataHistoryJson;
 
@@ -60,7 +53,7 @@ public class HttpTaskManager extends FileBackedTasksManager {
         JsonArray dataTasks = JsonParser.parseString(dataTasksJson).getAsJsonArray();
         for (JsonElement data: dataTasks) {
             JsonObject taskObj = data.getAsJsonObject();
-            Task task = null;
+            Task task = null; //требует null из-за проверки на 71 строке
             switch (taskObj.get("type").getAsString()) {
                 case "NORMAL":
                     task = UtilConstant.GSON.fromJson(data, Task.class);
